@@ -3,8 +3,8 @@ BasicGame.MainMenu = function (game) {
 
 	this.music = null;
 	this.sprite_title = null;
-	this.playButton = null;
 	this.sprite_airplane = null;
+	this.playButton = null;
 
 };
 
@@ -22,9 +22,11 @@ BasicGame.MainMenu.prototype = {
 		this.sprite_airplane = this.add.image(this.game.width * .5, this.game.height * .5, 'mainmenu_plane');
 		this.sprite_airplane.anchor.set(0.5,0.5);
 
-		this.sprite_title = this.add.image(this.game.width * .5, this.game.height * .3, 'mainmenu_title').anchor.set(0.5,0.5);
+		//this.sprite_title = this.add.image(this.game.width * .5, this.game.height * .3, 'mainmenu_title').anchor.set(0.5,0.5);
 
-		this.playButton = this.add.button(this.game.width * .5, this.game.height - 50, 'mainmenu_startbutton', this.startGame, this).anchor.set(0.5,0.5);
+        this.game.add.existing(Label(this, this.game.width * .5, this.game.height * .3, "Super\nAirplane\nGame", 36, "#ff0000", 'center')); //TODO: localize
+
+        this.game.add.existing(ButtonWithText(this, this.game.width * .5, this.game.height - 50, "Start", 'graphic_longbutton', 15, "#ffffff", this.startGame)); //TODO: localize
 
         this.scale.setResizeCallback(this.gameResized, this);
         this.gameResized();

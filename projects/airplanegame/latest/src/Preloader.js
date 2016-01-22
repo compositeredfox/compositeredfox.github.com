@@ -28,18 +28,19 @@ BasicGame.Preloader.prototype = {
 		//	as the files below are loaded in.
 		this.load.setPreloadSprite(this.preloadBar);
 
+		this.load.image('graphic_longbutton', 'images/graphic_longbutton.png');
+		this.load.image('graphic_smallbutton', 'images/graphic_smallbutton.png');
+
 		this.load.image('mainmenu_bg', 'images/mainmenu_bg.jpg');
 		this.load.image('mainmenu_bgclouds', 'images/mainmenu_bgclouds.png');
 		this.load.image('mainmenu_bgcloud2', 'images/mainmenu_bgcloud2.png');
 		this.load.image('mainmenu_plane', 'images/mainmenu_plane.png');
-		this.load.image('mainmenu_startbutton', 'images/mainmenu_startbutton.png');
 		this.load.image('mainmenu_title', 'images/mainmenu_title.png');
 
 		this.load.image('game_bg', 'images/game_bg.png');
 		this.load.image('game_character', 'images/game_character.png');
 		this.load.image('game_cloudsprite', 'images/game_cloudsprite.png');
 		this.load.atlas('game_laptop', 'images/game_laptop.png', 'images/game_laptop.json');
-		this.load.image('game_quitbutton', 'images/game_quitbutton.png');
 		this.load.image('game_damagebar_bg', 'images/game_damagebar_bg.png');
 		this.load.image('game_damagebar_fill', 'images/game_damagebar_fill.png');
 		this.load.image('game_damagebar_mask', 'images/game_damagebar_mask.png');
