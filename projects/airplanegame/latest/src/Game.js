@@ -195,7 +195,7 @@ BasicGame.Game.prototype = {
 	update: function () {
 
 
-        if (this.startCountdown > 0) {
+        if (this.startCountdown > 0 && !this.pauseScreen.visible) {
             this.startCountdown -= this.game.time.elapsedMS / 1000;
             this.countdownText.visible = this.startCountdown > 0;
             if (this.startCountdown <= 4) {
@@ -284,6 +284,7 @@ BasicGame.Game.prototype = {
     },
 
     togglePause: function(pointer) {
+
         this.pauseScreen.visible = !this.pauseScreen.visible;
     },
     restartGame: function(pointer) {
