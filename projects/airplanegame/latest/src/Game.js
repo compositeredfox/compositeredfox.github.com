@@ -133,7 +133,7 @@ BasicGame.Game.prototype = {
         
         if(this.damage > this.level_max_damage) {
             // lose
-            //this.state.start('MainMenu');
+            this.state.start('MainMenu');
         }
 
 	},
