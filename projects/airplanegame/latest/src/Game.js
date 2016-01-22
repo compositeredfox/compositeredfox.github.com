@@ -33,7 +33,8 @@ BasicGame.Game = function (game) {
     this.level_laptop_min_open_delay = 2;
     this.level_laptop_max_open_delay = 5;
     this.level_max_damage = 30; // max total seconds laptops have been open
-    this.level_damage_speed = 1; // units per second
+    this.level_laptop_open_speed = 1; // units per second
+    this.level_damage_speed = 0.7; // units per second
     this.level_score_speed = 100; // units per second
 
 };
@@ -99,16 +100,17 @@ BasicGame.Game.prototype = {
 	update: function () {
         var takingDamage = false;
 
-        this.damage = 0;
-
         for (var i = 0; i < this.laptops.length; i++) {
-            this.laptops[i].counter += (this.game.time.elapsedMS / 1000) * this.level_damage_speed; 
+            this.laptops[i].counter += (this.game.time.elapsedMS / 1000) * this.level_laptop_open_speed; 
 
             var wasOpen = this.laptops[i].open;
             this.laptops[i].open = this.laptops[i].counter > 0;
             
             if (this.laptops[i].open) {
-                this.damage += this.laptops[i].counter;
+                
+                //this.damage += this.laptops[i].counter;
+                this.damage += (this.game.time.elapsedMS / 1000) * this.level_damage_speed;
+
                 takingDamage = true;
                 if (!wasOpen) {
                     // TODO: some visual feedback that the laptop just opened   
