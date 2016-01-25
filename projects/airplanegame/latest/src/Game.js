@@ -23,22 +23,36 @@ BasicGame.Game = function (game) {
     //	But do consider them as being 'reserved words', i.e. don't create a property for your own game called "world" or you'll over-write the world reference.
 
     this.scoreText = null;
+    this.progressText = null;
     this.pauseScreen = null;
     this.endGameScreen = null;
-    this.countdownText = null;
+    this.levelText = null;
 
     this.laptops = [];
     this.damage = 0;
+    this.health = 0;
     this.damageBar = {};
     this.score = 0;
-    this.startCountdown = 5;
+    this.currentLevelNumber = 0;
+    this.laptopsPressed = 0;
 
-    this.level_laptop_min_open_delay = 2;
-    this.level_laptop_max_open_delay = 5;
-    this.level_max_damage = 30; // max total seconds laptops have been open
-    this.level_laptop_open_speed = 1; // units per second
-    this.level_damage_speed = 0.7; // units per second
-    this.level_score_speed = 100; // units per second
+    this.playing = false;
+
+    // level
+    this.config_defaults = {
+        total_health: 30, // max total seconds laptops have been open
+        laptop_min_open_delay: 2,
+        laptop_max_open_delay: 5,
+        damage_speed: 1, // laptop damage when open, in units per second
+        max_concurrent_laptops: 4,
+
+        laptops_goal: 10
+    };
+    this.config_levels = [
+        { laptops_goal: 5, laptop_min_open_delay: 2, laptop_max_open_delay: 5, total_health: 30, damage_speed: 0.5, max_concurrent_laptops:1 },
+        { laptops_goal: 10, laptop_min_open_delay: 1, laptop_max_open_delay: 2, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:2 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+    ];
 
 };
 
@@ -80,8 +94,6 @@ BasicGame.Game.prototype = {
             group_laptops.add(laptops[i].button);
             laptops[i].button.frame = 0;
 
-            this.closeLaptop(laptops[i]);
-
         };
         
         this.damageBar = {};
@@ -92,18 +104,20 @@ BasicGame.Game.prototype = {
         this.damageBar.group.add(this.damageBar.bg);
         this.damageBar.fill = new Phaser.Image(this.game, 0,0,'game_damagebar_fill');
         this.damageBar.fill.anchor.set(0,0.5);
-        this.damageBar.fill.scale.x = 0;
-        this.damageBar.fill.width = this.damageBar.bg.width;
+        this.damageBar.fill.width = 0;//this.damageBar.bg.width;
         this.damageBar.group.add(this.damageBar.fill);
             
         var style = { font: "18px Arial", fill: "#ffffff", align: "left" };
         this.scoreText = this.game.add.text(5, 5, "0P", style);
 
+        style = { font: "18px Arial", fill: "#ffffff", align: "left" };
+        this.progressText = this.game.add.text(90, 5, "0 / " + this.config_levels[0].laptops_goal, style);
+
         this.game.add.existing(ButtonWithText(this, 50, h-35, "pause", 'graphic_smallbutton', 13, "#ffffff", this.togglePause));
 
-        this.countdownText = Label(this, this.game.width * .5, this.game.height * .5 - 40, "", 64, "#ff0000", 'center');
-        this.countdownText.visible = false;
-        this.game.add.existing(this.countdownText);
+        this.levelText = Label(this, this.game.width * .5, this.game.height * .5 - 40, "", 64, "#ff0000", 'center');
+        this.levelText.visible = false;
+        this.game.add.existing(this.levelText);
 
         // Pause screen
         this.pauseScreen = this.game.add.group();
@@ -145,7 +159,7 @@ BasicGame.Game.prototype = {
         b.onInputDown.add(this.ignore, this);
         this.endGameScreen.add(b);
 
-        this.endGameScreen.title = Label(this,0 , 0, "GAME OVER", 64, "#00ff00", 'center');
+        this.endGameScreen.title = Label(this,0 , 0, "", 64, "#00ff00", 'center');
         this.endGameScreen.title.anchor.set(0.5,1);
         this.endGameScreen.input = new Phaser.Text(this.game, 80, 15, "| YOUR NAME?   ", { font: "24px Arial", fill: "#ffffff", align: "right" });
         this.endGameScreen.input.anchor.set(1,0.5);
@@ -185,54 +199,54 @@ BasicGame.Game.prototype = {
         this.endGameScreen.add(this.endGameScreen.button_www);
         
         
-
         this.endGameScreen.visible = false;
         //this.game.add.existing(this.endGameScreen);
 
+        this.startLevel(0, 500);
 
 	},
 
 	update: function () {
 
-
-        if (this.startCountdown > 0 && !this.pauseScreen.visible) {
-            this.startCountdown -= this.game.time.elapsedMS / 1000;
-            this.countdownText.visible = this.startCountdown > 0;
-            if (this.startCountdown <= 4) {
-                if (this.startCountdown > 1)
-                    this.countdownText.text = (this.startCountdown).toString().substring(0,1);
-                else
-                    this.countdownText.text = 'GO!';
-                this.countdownText.scale.set(0.1 + 0.9 * (this.startCountdown % 1));
-            }
-        }
-
-        if (this.pauseScreen.visible || this.endGameScreen.visible || this.startCountdown > 1) {
+        if (this.pauseScreen.visible || this.endGameScreen.visible || !this.playing) {
             // paused
 
         } else {
+            if (BasicGame.orientated)
+                this.togglePause();
+
             var takingDamage = false;
 
+            var open_laptops = 0;
             for (var i = 0; i < this.laptops.length; i++) {
-                this.laptops[i].counter += (this.game.time.elapsedMS / 1000) * this.level_laptop_open_speed; 
+                if (this.laptops[i].counter > 0) open_laptops++;
+            }
+            
+            for (var i = 0; i < this.laptops.length; i++) {
+                this.laptops[i].counter += (this.game.time.elapsedMS / 1000); 
 
-                var wasOpen = this.laptops[i].open;
-                this.laptops[i].open = this.laptops[i].counter > 0;
-                
-                if (this.laptops[i].open) {
-                    
-                    //this.damage += this.laptops[i].counter;
-                    this.damage += (this.game.time.elapsedMS / 1000) * this.level_damage_speed;
+                if (this.laptops[i].counter > 0) {
 
-                    takingDamage = true;
-                    if (!wasOpen) {
-                        // TODO: some visual feedback that the laptop just opened   
+                    if (!this.laptops[i].open) {
+                        // if there are too many laptops, reset the counter
+                        if (open_laptops >= this.getLevelProperty('max_concurrent_laptops')) {
+                            this.resetLaptopCounter(this.laptops[i]);
+                        } else {
+                            this.laptops[i].open = true;
+                            // TODO: some visual feedback that the laptop just opened   
+                        }
+
+                    } else {
+                        open_laptops++;
+
+                        this.damage += (this.game.time.elapsedMS / 1000) * this.getLevelProperty('damage_speed');
+                        takingDamage = true;
                     }
                 }
                 this.laptops[i].button.frame = this.laptops[i].open ? 1 : 0;
             };
 
-            var d = (this.damage / this.level_max_damage);
+            var d = (this.damage / this.health);
             this.damageBar.fill.width = this.damageBar.bg.width * d;
             //this.damageBar.fill.tint = Phaser.Color.interpolate("#ffffff", "#ff0000", 10, d * 10, 1.0);
 
@@ -243,12 +257,26 @@ BasicGame.Game.prototype = {
                 this.damageBar.angle = 0;
             }
 
-            this.score += (this.game.time.elapsedMS / 1000) * this.level_score_speed;
             this.scoreText.text = this.score.toString().split('.')[0] + "P";
+            this.progressText.text = this.laptopsPressed + " / " + this.getLevelProperty('laptops_goal');
             
-            if(this.damage > this.level_max_damage) {
+            if(this.damage > this.health) {
                 // lose
-                this.onEndGame();
+                this.playing = false;
+                var t = this.tweenLevelText("GAME OVER", 3000); //TODO: localize
+                t.onComplete.add(function(target,tween){
+                    this.onEndGame();
+                },this);
+                t.start();
+            }
+            if(this.laptopsPressed >= this.getLevelProperty('laptops_goal')) {
+                // win
+                this.playing = false;
+                var t = this.tweenLevelText("WIN", 3000); //TODO: localize
+                t.onComplete.add(function(target,tween){
+                    this.startLevel(this.currentLevelNumber+1, 3000);
+                },this);
+                t.start();
             }
         }
         
@@ -256,7 +284,7 @@ BasicGame.Game.prototype = {
 	},
 
     onHitLaptop: function(button, game, laptopObject) {
-        //console.log("hit laptop " + laptopObject.index);
+        //console.log("hit laptop " + laptopObject);
         if (laptopObject.open) {
             this.closeLaptop(laptopObject);
             // TODO: some visual feedback you closed the laptop
@@ -273,10 +301,17 @@ BasicGame.Game.prototype = {
         if (this.pauseScreen.visible)
             this.pauseScreen.visible = false;
 
+        if (this.score > BasicGame.lastScore)
+            this.endGameScreen.title.text = "NEW HIGH SCORE"; //TODO: localize
+        else
+            this.endGameScreen.title.text = "GAME OVER"; //TODO: localize
         this.endGameScreen.hiscore.text = this.score.toString().split('.')[0] + "p";
 
         this.game.add.existing(this.endGameScreen);
         this.endGameScreen.visible = true;
+
+        if (this.score > BasicGame.lastScore)
+            BasicGame.lastScore = this.score;
     },
 
     toggleFullScreen: function(button) {
@@ -292,7 +327,7 @@ BasicGame.Game.prototype = {
         this.state.start('Game');
     },
     gotoHiscores: function(pointer) {
-        //
+        this.state.start('Leaderboard');
     },
     openWebsite: function(pointer) {
         window.open("http://www.google.com", "_blank");
@@ -302,24 +337,102 @@ BasicGame.Game.prototype = {
         this.state.start('MainMenu');
 
     },
-    ignore: function(pointer){},
+    ignore: function(){},
 
     // reset
-    resetState: function(point) {
+    resetState: function() {
         this.scoreText = null;
         this.pauseScreen = null;
         this.endGameScreen = null;
 
+        this.playing = false;
         this.laptops = [];
         this.damage = 0;
         this.damageBar = {};
         this.score = 0;
-        this.startCountdown = 5;
+        this.currentLevelNumber = 0;
+        this.laptopsPressed = 0;
+    },
+
+    startLevel: function(levelnumber, startDelay) {
+        this.currentLevelNumber = levelnumber;
+
+        // counters
+        this.damage = 0;
+        this.laptopsPressed = 0;
+        this.health = this.getLevelProperty('total_health');
+        //state
+        for (var i = 0; i < this.laptops.length; i++) {
+            this.resetLaptopCounter(this.laptops[i]);
+            this.laptops[i].open = false;
+        };
+
+        console.log("Starting level #" + this.currentLevelNumber + " with properties: \n" +
+            "laptop_min_open_delay: "+this.getLevelProperty('laptop_min_open_delay') + "\n" + 
+            "laptop_max_open_delay: "+this.getLevelProperty('laptop_max_open_delay') + "\n" + 
+            "total_health: "+this.getLevelProperty('total_health') + "\n" + 
+            "damage_speed: "+this.getLevelProperty('damage_speed') + "\n" + 
+            "max_concurrent_laptops: "+this.getLevelProperty('max_concurrent_laptops') + "\n" + 
+            "laptops_goal: "+this.getLevelProperty('laptops_goal')
+        );
+
+        // init
+        var t = this.tweenLevelText("LEVEL " + (this.currentLevelNumber + 1), 2000); //TODO: localize
+        t.delay(startDelay);
+        /*
+        t.chain(this.tweenLevelText("3", 1000));
+        t.chain(this.tweenLevelText("2", 1000));
+        t.chain(this.tweenLevelText("1", 1000));
+        t.chain(this.tweenLevelText("GO", 1000));
+        */
+        t.onComplete.add(function(target,tween){this.playing=true;},this);
+        t.start();
+
+
     },
 	
     // gameplay
     closeLaptop: function(laptopObject) {
-        laptopObject.counter = 0 - (this.level_laptop_min_open_delay + Math.random() * this.level_laptop_max_open_delay);
+        laptopObject.open = false;
+        this.resetLaptopCounter(laptopObject);
+        this.score += 10;
+        this.laptopsPressed++;
+    },
+
+    resetLaptopCounter: function(laptopObject) { 
+        laptopObject.counter = 0 - (this.getLevelProperty('laptop_min_open_delay') + Math.random() * this.getLevelProperty('laptop_max_open_delay')); 
+    },
+
+    getLevelProperty: function(property) {
+        var v = null;
+        if (this.config_levels[this.currentLevelNumber] != null) v = this.config_levels[this.currentLevelNumber][property];
+        if (v == null) v = this.config_defaults[property];
+        if (v == null) console.log("Error getting level property " + property);
+        return v;
+    },
+
+    tweenLevelText: function(string, duration, autoStart) {
+        if (autoStart == null) autoStart = false;
+
+        var tweenIn = this.game.add.tween(this.levelText.scale);
+        tweenIn.to( { x:1,y:1 }, duration * 0.1, Phaser.Easing.Circular.Out);
+        tweenIn.onStart.add(function(target, tween){ 
+            this.levelText.text = string;
+            this.levelText.visible = true;
+            this.levelText.scale.x = this.levelText.scale.y = 0;
+            tween.timeline[tween.current].vStart.x = tween.timeline[tween.current].vStart.y = 0; //update the initial value (onStart gets called after the tween gets the current value)
+        }, this);
+
+        var tweenOut = this.game.add.tween(this.levelText.scale);
+        tweenOut.to( { x:0,y:0 }, duration * 0.1, Phaser.Easing.Circular.In, false, duration * 0.8);
+        tweenOut.onComplete.add(function(target, tween){ 
+            this.levelText.visible = false;
+        }, this);
+
+        tweenIn.chain(tweenOut);
+
+        return tweenIn;
+
     }
 
 };

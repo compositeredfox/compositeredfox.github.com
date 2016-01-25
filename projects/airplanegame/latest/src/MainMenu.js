@@ -26,7 +26,8 @@ BasicGame.MainMenu.prototype = {
 
         this.game.add.existing(Label(this, this.game.width * .5, this.game.height * .3, "Super\nAirplane\nGame", 36, "#ff0000", 'center')); //TODO: localize
 
-        this.game.add.existing(ButtonWithText(this, this.game.width * .5, this.game.height - 50, "Start", 'graphic_longbutton', 15, "#ffffff", this.startGame)); //TODO: localize
+        this.game.add.existing(ButtonWithText(this, this.game.width * .5, this.game.height - 80, "Start", 'graphic_longbutton', 15, "#ffffff", this.startGame)); //TODO: localize
+        this.game.add.existing(ButtonWithText(this, this.game.width - 40, this.game.height - 30, "High Scores", 'graphic_smallbutton', 12, "#ffffff", this.openLeaderboards)); //TODO: localize
 
         this.scale.setResizeCallback(this.gameResized, this);
         this.gameResized();
@@ -47,6 +48,10 @@ BasicGame.MainMenu.prototype = {
 
 		//	And start the actual game
 		this.state.start('Game');
+
+	},
+	openLeaderboards: function (pointer) {
+		this.state.start('Leaderboard');
 
 	},
 
