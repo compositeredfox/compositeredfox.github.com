@@ -239,7 +239,7 @@ BasicGame.Game.prototype = {
             // paused
 
         } else {
-            if (BasicGame.orientated)
+            if (!BasicGame.orientated)
                 this.togglePause();
 
             var takingDamage = false;
