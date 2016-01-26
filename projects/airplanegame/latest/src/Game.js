@@ -140,7 +140,7 @@ BasicGame.Game.prototype = {
         style = { font: "18px Pebble", fill: "#ffffff", align: "left" };
         this.progressText = this.game.add.text(90, 5, "0 / " + this.config_levels[0].laptops_goal, style);
 
-        this.game.add.existing(ButtonWithText(this, 50, h-35, "pause", 'graphic_smallbutton', 13, "#ffffff", this.togglePause));
+        this.pauseButton = this.game.add.existing(ButtonWithText(this, 50, h-35, "pause", 'graphic_smallbutton', 13, "#ffffff", this.togglePause));
 
         this.levelText = Label(this, this.game.width * .5, this.game.height * .5 - 40, "", 64, "#ff0000", 'center');
         this.levelText.visible = false;

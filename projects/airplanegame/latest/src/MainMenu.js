@@ -31,8 +31,8 @@ BasicGame.MainMenu.prototype = {
 
         this.game.add.existing(Label(this, this.game.width * .5, this.game.height * .3, "Game Title", 64, "#ffffec", 'center')); //TODO: localize
 
-        this.game.add.existing(ButtonWithText(this, this.game.width * .5, this.game.height - 80, "Start", 'graphic_longbutton', 15, "#ffffff", this.startGame)); //TODO: localize
-        this.game.add.existing(ButtonWithText(this, this.game.width - 40, this.game.height - 30, "High Scores", 'graphic_smallbutton', 12, "#ffffff", this.openLeaderboards)); //TODO: localize
+        this.button_start = this.game.add.existing(ButtonWithText(this, this.game.width * .5, this.game.height * 0.65, "Start", 'graphic_longbutton', 15, "#ffffff", this.startGame)); //TODO: localize
+        this.button_hiscores = this.game.add.existing(ButtonWithText(this, this.game.width - 40, this.game.height - 30, "High Scores", 'graphic_smallbutton', 12, "#ffffff", this.openLeaderboards)); //TODO: localize
 
         this.scale.setResizeCallback(this.gameResized, this);
         this.gameResized();
@@ -76,6 +76,11 @@ BasicGame.MainMenu.prototype = {
 		var w = this.game.width;
 		var h = this.game.height;
 		//console.log("gameResized " + w + "x" + h);
+
+		this.button_start.x = this.game.width * .5;
+		this.button_start.y = this.game.height * 0.65;
+        this.button_hiscores.x = this.game.width - 40;
+        this.button_hiscores.y = this.game.height - 30;
 		
     }
 
