@@ -27,6 +27,7 @@ BasicGame.Game = function (game) {
     this.pauseScreen = null;
     this.endGameScreen = null;
     this.levelText = null;
+    this.sprites = {};
 
     this.laptops = [];
     this.damage = 0;
@@ -38,15 +39,26 @@ BasicGame.Game = function (game) {
 
     this.playing = false;
 
+    this.npcs = [
+        { img: 'game_chars1_1', offset: {x:-3, y:25}, lookAt: 3 },
+        { img: 'game_chars1_2', offset: {x:-1, y:26}, lookAt: 2 },
+        { img: 'game_chars1_3', offset: {x:-55, y:2}, lookAt: 1 },
+        { img: 'game_chars1_4', offset: {x:-4, y:35}, lookAt: 0 },
+        { img: 'game_chars2_1', offset: {x:-8, y:40}, lookAt: 3 },
+        { img: 'game_chars2_2', offset: {x:63, y:-2}, lookAt: 2 },
+        { img: 'game_chars2_3', offset: {x:-2, y:35}, lookAt: 1 },
+        { img: 'game_chars2_4', offset: {x:4, y:38}, lookAt: 0 }
+    ];
+
     // level
     this.config_defaults = {
-        total_health: 30, // max total seconds laptops have been open
-        laptop_min_open_delay: 2,
-        laptop_max_open_delay: 5,
+        total_health: 30, // max seconds laptops can been open
+        laptop_min_open_delay: 2, // minimum time a laptop stays closed
+        laptop_max_open_delay: 5, // maximum time a laptop stays closed
         damage_speed: 1, // laptop damage when open, in units per second
         max_concurrent_laptops: 4,
 
-        laptops_goal: 10
+        laptops_goal: 10 // how many laptops to close for the level to be complete
     };
     this.config_levels = [
         { laptops_goal: 5, laptop_min_open_delay: 2, laptop_max_open_delay: 5, total_health: 30, damage_speed: 0.5, max_concurrent_laptops:1 },
@@ -73,26 +85,41 @@ BasicGame.Game.prototype = {
 
         this.game.add.image(0,0,'game_bg');
 
+        for(var i=0; i < 4; i++) { this.npcs[i].sprite = this.game.add.image(this.npcs[i].offset.x,this.npcs[i].offset.y,this.npcs[i].img); }
+
+        this.game.add.image(0,0,'game_row1');
+
+        for(var i=4; i < 8; i++) { this.npcs[i].sprite = this.game.add.image(this.npcs[i].offset.x,this.npcs[i].offset.y,this.npcs[i].img); }
+
+        this.game.add.image(0,0,'game_row2');
+
+        this.game.add.image(0,0,'game_characters');
+
         var group_characters = this.game.add.group();
         var group_laptops = this.game.add.group();
 
-        var laptops = this.laptops;
+        laptops = this.laptops;
+        laptops_positions = [
+            { x: 130, y: 312 },
+            { x: 290, y: 311 },
+            { x: 608, y: 320 },
+            { x: 756, y: 303 }
+        ];
         for (var i = 0; i < 4; i++) {
-            var pos = new Phaser.Point(w * (.18 + .22 * i), h * .6);
             laptops[i] = {};
             laptops[i].index = i;
-            laptops[i].character = new Phaser.Sprite(this.game,pos.x,pos.y,'game_character');
-            laptops[i].character.anchor.set(0.5,0.5);
-            laptops[i].character.scale.x = laptops[i].character.scale.y = 0.8;
+            /*
+            laptops[i].character = new Phaser.Sprite(position[i].x,positions[i].y,'game_character');
+            laptops[i].character.scale.x = (i>2?-1:1);
             group_characters.add(laptops[i].character);
-
-            laptops[i].button = new Phaser.Button(this.game,pos.x,pos.y, 'game_laptop');
+            */
+            laptops[i].button = new Phaser.Button(this.game, laptops_positions[i].x,laptops_positions[i].y, 'game_laptop');
             laptops[i].button.onInputDown.add(this.onHitLaptop, this, 0, laptops[i]);
-            
-            laptops[i].button.anchor.set(0.5,0.5);
-            laptops[i].button.scale.x = laptops[i].button.scale.y = 0.8;
+            laptops[i].button.scale.x = (i>=2?-1:1);
+            if (laptops[i].button.scale.x<0) laptops[i].button.anchor.set(1,0);
             group_laptops.add(laptops[i].button);
             laptops[i].button.frame = 0;
+            
 
         };
         
@@ -107,10 +134,10 @@ BasicGame.Game.prototype = {
         this.damageBar.fill.width = 0;//this.damageBar.bg.width;
         this.damageBar.group.add(this.damageBar.fill);
             
-        var style = { font: "18px Arial", fill: "#ffffff", align: "left" };
+        var style = { font: "18px Pebble", fill: "#ffffff", align: "left" };
         this.scoreText = this.game.add.text(5, 5, "0P", style);
 
-        style = { font: "18px Arial", fill: "#ffffff", align: "left" };
+        style = { font: "18px Pebble", fill: "#ffffff", align: "left" };
         this.progressText = this.game.add.text(90, 5, "0 / " + this.config_levels[0].laptops_goal, style);
 
         this.game.add.existing(ButtonWithText(this, 50, h-35, "pause", 'graphic_smallbutton', 13, "#ffffff", this.togglePause));
@@ -243,8 +270,18 @@ BasicGame.Game.prototype = {
                         takingDamage = true;
                     }
                 }
-                this.laptops[i].button.frame = this.laptops[i].open ? 1 : 0;
+                this.laptops[i].button.frame = this.laptops[i].open ? 2 : 0;
             };
+
+            for(var i=0; i < this.npcs.length; i++) { 
+                var looking = this.laptops[this.npcs[i].lookAt].open;
+                var t = this.laptops[this.npcs[i].lookAt].counter;
+                //this.npcs[i].sprite.x = (looking ? this.npcs[i].offset.x : 0) * Phaser.Easing.Circular.InOut((this.game.time.elapsedMS / 1000) * 0.25);
+                //this.npcs[i].sprite.y = (looking ? this.npcs[i].offset.y : 0) * Phaser.Easing.Circular.InOut((this.game.time.elapsedMS / 1000) * 0.25);
+                this.npcs[i].sprite.x = lerp(this.npcs[i].sprite.x, (looking ? 0 : this.npcs[i].offset.x), clamp01((this.game.time.elapsedMS / 1000) * 0.75));
+                this.npcs[i].sprite.y = lerp(this.npcs[i].sprite.y, (looking ? 0 : this.npcs[i].offset.y), clamp01((this.game.time.elapsedMS / 1000) * 0.75));
+            }
+
 
             var d = (this.damage / this.health);
             this.damageBar.fill.width = this.damageBar.bg.width * d;
