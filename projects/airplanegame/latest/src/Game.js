@@ -239,8 +239,8 @@ BasicGame.Game.prototype = {
             // paused
 
         } else {
-            if (!BasicGame.orientated)
-                this.togglePause();
+            /*if (!BasicGame.orientated)
+                this.togglePause();*/
 
             var takingDamage = false;
 
