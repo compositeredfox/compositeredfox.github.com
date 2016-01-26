@@ -295,7 +295,7 @@ BasicGame.Game.prototype = {
             }
 
             this.scoreText.text = this.score.toString().split('.')[0] + "P";
-            this.progressText.text = this.laptopsPressed + " / " + this.getLevelProperty('laptops_goal');
+            this.progressText.text = "Level " + this.currentLevelNumber + "  " + this.laptopsPressed + " / " + this.getLevelProperty('laptops_goal');
             
             if(this.damage > this.health) {
                 // lose
