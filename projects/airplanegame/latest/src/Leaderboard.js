@@ -45,7 +45,7 @@ BasicGame.Leaderboard.prototype = {
     },
 
     gotoMainMenu: function (pointer) {
-        this.state.start('MainMenu');
+        TransitionToState('MainMenu', this.stage);
     }
 
 };

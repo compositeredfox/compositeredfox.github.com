@@ -21,7 +21,7 @@ BasicGame.Game = function (game) {
 
     //	You can use any of these from any function within this State.
     //	But do consider them as being 'reserved words', i.e. don't create a property for your own game called "world" or you'll over-write the world reference.
-
+    this.gameGroup = null;
     this.scoreText = null;
     this.progressText = null;
     this.pauseScreen = null;
@@ -36,18 +36,19 @@ BasicGame.Game = function (game) {
     this.score = 0;
     this.currentLevelNumber = 0;
     this.laptopsPressed = 0;
+    this.turbulence = 0;
 
     this.playing = false;
 
     this.npcs = [
-        { img: 'game_chars1_1', offset: {x:-3, y:25}, lookAt: 3 },
-        { img: 'game_chars1_2', offset: {x:-1, y:26}, lookAt: 2 },
-        { img: 'game_chars1_3', offset: {x:-55, y:2}, lookAt: 1 },
-        { img: 'game_chars1_4', offset: {x:-4, y:35}, lookAt: 0 },
-        { img: 'game_chars2_1', offset: {x:-8, y:40}, lookAt: 3 },
-        { img: 'game_chars2_2', offset: {x:63, y:-2}, lookAt: 2 },
-        { img: 'game_chars2_3', offset: {x:-2, y:35}, lookAt: 1 },
-        { img: 'game_chars2_4', offset: {x:4, y:38}, lookAt: 0 }
+        { img: 'game_row1_char1', posLooking: {x:1171,y:283}, offsetOnIdle: {x:-1,y:68}, lookAt: 3 },
+        { img: 'game_row1_char2', posLooking: {x:1027,y:324}, offsetOnIdle: {x:-5,y:73}, lookAt: 2 },
+        { img: 'game_row1_char3', posLooking: {x:870,y:409}, offsetOnIdle: {x:-85,y:12}, lookAt: 1 },
+        { img: 'game_row1_char4', posLooking: {x:615,y:293}, offsetOnIdle: {x:-7,y:69}, lookAt: 0 },
+        { img: 'game_row2_char1', posLooking: {x:1206,y:379}, offsetOnIdle: {x:-8,y:54}, lookAt: 3 },
+        { img: 'game_row2_char2', posLooking: {x:933,y:447}, offsetOnIdle: {x:89,y:-23}, lookAt: 2 },
+        { img: 'game_row2_char3', posLooking: {x:761,y:354}, offsetOnIdle: {x:-7,y:76}, lookAt: 1 },
+        { img: 'game_row2_char4', posLooking: {x:548, y:358}, offsetOnIdle: {x:4,y:71}, lookAt: 0 }
     ];
 
     // level
@@ -79,92 +80,142 @@ BasicGame.Game.prototype = {
         var w = this.game.width;
         var h = this.game.height;
 
-        var sky = this.game.add.image(0,0,'mainmenu_bg');
-        sky.width = w;
-        sky.height = h;
 
-        this.game.add.image(0,0,'game_bg');
+        this.gameGroup = this.game.add.group();
+        this.uiGroup = this.game.add.group();
 
-        for(var i=0; i < 4; i++) { this.npcs[i].sprite = this.game.add.image(this.npcs[i].offset.x,this.npcs[i].offset.y,this.npcs[i].img); }
+        var sky = this.gameGroup.add(new Phaser.Image(this.game,0,0,'game_sky'));
+        sky.width = 1920;
+        sky.height = 1080;
 
-        this.game.add.image(0,0,'game_row1');
+        var cloud1 = this.gameGroup.add(new Phaser.Sprite(this.game,227,506,'game_cloud1'));
+        cloud1.animations.add('idle',[0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,0,0,0,0,0,0,0], 6, true);
+        cloud1.play('idle');
 
-        for(var i=4; i < 8; i++) { this.npcs[i].sprite = this.game.add.image(this.npcs[i].offset.x,this.npcs[i].offset.y,this.npcs[i].img); }
+        var cloud2 = this.gameGroup.add(new Phaser.Sprite(this.game,1411,430,'game_cloud2'));
+        cloud2.animations.add('idle',[0,0,0,1,2,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 6 , true);
+        cloud2.play('idle');
 
-        this.game.add.image(0,0,'game_row2');
+        this.gameGroup.add(new Phaser.Image(this.game, 0,0,'game_bg'));
 
-        this.game.add.image(0,0,'game_characters');
+        for(var i=0; i < 4; i++) { this.npcs[i].sprite = this.gameGroup.add(new Phaser.Image(this.game, this.npcs[i].posLooking.x + this.npcs[i].offsetOnIdle.x,this.npcs[i].posLooking.y + this.npcs[i].offsetOnIdle.y,this.npcs[i].img)); }
 
-        var group_characters = this.game.add.group();
-        var group_laptops = this.game.add.group();
+        this.gameGroup.add(new Phaser.Image(this.game, 567,415,'game_chairs2'));
+
+        for(var i=4; i < 8; i++) { this.npcs[i].sprite = this.gameGroup.add(new Phaser.Image(this.game, this.npcs[i].posLooking.x + this.npcs[i].offsetOnIdle.x,this.npcs[i].posLooking.y + this.npcs[i].offsetOnIdle.y,this.npcs[i].img)); }
+
+        this.gameGroup.add(new Phaser.Image(this.game, 483,463,'game_chairs3'));
+
+        var group_characters = this.gameGroup.add(new Phaser.Group(this.game));
+        var group_laptops = this.gameGroup.add(new Phaser.Group(this.game));
 
         laptops = this.laptops;
-        laptops_positions = [
-            { x: 130, y: 312 },
-            { x: 290, y: 311 },
-            { x: 608, y: 320 },
-            { x: 756, y: 303 }
+        var laptops_positions = [
+            { x: 408, y: 603 },
+            { x: 630, y: 615 },
+            { x: 1067, y: 618 },
+            { x: 1289, y: 616 }
         ];
+        var characters_positions = [
+            { x: 493, y: 561 },
+            { x: 661, y: 484 },
+            { x: 1070, y: 553 },
+            { x: 1265, y: 442 }
+        ];
+        var characters_frames = [
+            [0,0,0,0,0,0,1,2,3,4,5,0,0,0,0,0],
+            [0,0,1,2,3,4,5,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,2,3,4,5,0],
+            [2,3,4,5,0,0,0,0,0,0,0,0,0,0,0,1]
+        ]
         for (var i = 0; i < 4; i++) {
             laptops[i] = {};
             laptops[i].index = i;
-            /*
-            laptops[i].character = new Phaser.Sprite(position[i].x,positions[i].y,'game_character');
-            laptops[i].character.scale.x = (i>2?-1:1);
+            
+            laptops[i].character = new Phaser.Sprite(this.game,characters_positions[i].x,characters_positions[i].y,'game_char' + (i+1));
+            laptops[i].character.animations.add('idle', characters_frames[i], 5, true);
+            laptops[i].character.play('idle');
+
             group_characters.add(laptops[i].character);
-            */
+
+            laptops[i].particles_secrets = new Phaser.Particles.Arcade.Emitter(this.game,0,0,30);
+            laptops[i].particles_secrets.makeParticles(['game_particle_secrets1', 'game_particle_secrets2', 'game_particle_secrets3', 'game_particle_secrets4']);
+            laptops[i].particles_secrets.setSize(60,50);
+            laptops[i].particles_secrets.particleAnchor.set(0.5,0.5);
+            laptops[i].particles_secrets.setRotation(-80,80);
+            laptops[i].particles_secrets.gravity = -100;
+            laptops[i].particles_secrets.start(false, 1000, 250);
+            //laptops[i].particles_secrets.setScale(1,0,1,0,1);
+            laptops[i].particles_secrets.on = false;
+            laptops[i].particles_secrets.x = laptops_positions[i].x + 80;
+            laptops[i].particles_secrets.y = laptops_positions[i].y + 70;
+            group_laptops.add(laptops[i].particles_secrets);
+
+
             laptops[i].button = new Phaser.Button(this.game, laptops_positions[i].x,laptops_positions[i].y, 'game_laptop');
             laptops[i].button.onInputDown.add(this.onHitLaptop, this, 0, laptops[i]);
             laptops[i].button.scale.x = (i>=2?-1:1);
             if (laptops[i].button.scale.x<0) laptops[i].button.anchor.set(1,0);
             group_laptops.add(laptops[i].button);
-            laptops[i].button.frame = 0;
-            
+            laptops[i].openRatio = laptops[i].button.frame = 0;
 
+            
         };
+        laptops[1].button.moveUp();
+        laptops[2].button.moveUp();
+        laptops[2].button.moveUp();
         
         this.damageBar = {};
-        this.damageBar.group = this.game.add.group();
-        this.damageBar.group.position.set(w * .35, h * .1);
+        this.damageBar.group = this.uiGroup.add(new Phaser.Group(this.game));
+        this.damageBar.group.position.set(450, 9);
         this.damageBar.bg = new Phaser.Image(this.game, 0,0,'game_damagebar_bg');
-        this.damageBar.bg.anchor.set(0,0.5);
         this.damageBar.group.add(this.damageBar.bg);
-        this.damageBar.fill = new Phaser.Image(this.game, 0,0,'game_damagebar_fill');
-        this.damageBar.fill.anchor.set(0,0.5);
+        this.damageBar.fill = new Phaser.Image(this.game, 12,8,'game_damagebar_fill');
         this.damageBar.fill.width = 0;//this.damageBar.bg.width;
+        this.damageBar.fill.height = this.damageBar.bg.height-16;//this.damageBar.bg.width;
         this.damageBar.group.add(this.damageBar.fill);
             
-        var style = { font: "18px Pebble", fill: "#ffffff", align: "left" };
-        this.scoreText = this.game.add.text(5, 5, "0P", style);
+        var style = { font: "36px Pebble", fill: "#000000", align: "left" };
+        this.scoreText = this.uiGroup.add(new Phaser.Text(this.game, 10, 5, "0P", style));
 
-        style = { font: "18px Pebble", fill: "#ffffff", align: "left" };
-        this.progressText = this.game.add.text(90, 5, "0 / " + this.config_levels[0].laptops_goal, style);
+        style = { font: "36px Pebble", fill: "#000000", align: "left" };
+        this.progressText = this.uiGroup.add(new Phaser.Text(this.game, 160, 5, "LEVEL 1  0 / " + this.config_levels[0].laptops_goal, style));
 
-        this.pauseButton = this.game.add.existing(ButtonWithText(this, 50, h-35, "pause", 'graphic_smallbutton', 13, "#ffffff", this.togglePause));
+        this.pauseButton = this.uiGroup.add(ButtonWithText(this,0,0, "- PAUSE -", 'graphic_smallbutton', 20, 0x000000, this.togglePause));
+        this.pauseButton.scale.set(0.8,0.8);
+        this.pauseButton.alpha = 0.8;
+        this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
+        this.pauseButton.y = this.pauseButton.height*.5 + 10;
 
-        this.levelText = Label(this, this.game.width * .5, this.game.height * .5 - 40, "", 64, "#ff0000", 'center');
+        this.levelText = Label(this, this.game.width * .5, this.game.height * .5 - 40, "", 110, "#000000", 'center');
         this.levelText.visible = false;
-        this.game.add.existing(this.levelText);
+        this.uiGroup.add(this.levelText);
 
         // Pause screen
-        this.pauseScreen = this.game.add.group();
+        this.pauseScreen = this.uiGroup.add(new Phaser.Group(this.game));
 
-        var g = this.game.add.graphics(0,0, this.pauseScreen);
-        g.beginFill("#000000", 0.6);
-        g.drawRect(0,0, this.game.width, this.game.height);
-        g.endFill();
 
-        var b = new Phaser.Button(this.game,0,0,'');
-        b.width = g.width;
-        b.height = g.height;
-        b.onInputDown.add(this.togglePause, this);
-        this.pauseScreen.add(b);
+        this.pauseScreen.blockerGraphic = this.game.add.graphics(0,0, this.pauseScreen);
+        this.pauseScreen.blockerGraphic.beginFill("#000000", 0.6);
+        this.pauseScreen.blockerGraphic.drawRect(0,0, this.game.width, this.game.height);
+        this.pauseScreen.blockerGraphic.endFill();
 
-        var l = Label(this,this.game.width * .5, this.game.height * .5, "PAUSED", 72, "#00ff00", 'center');
-        l.alpha = 0.5;
-        this.pauseScreen.add(l);
-        this.pauseScreen.add(ButtonWithText(this,this.game.width * .5, this.game.height * .5 + 60, "continue", 'graphic_smallbutton', 13, "#ffffff", this.togglePause));
-        this.pauseScreen.add(ButtonWithText(this,this.game.width * .5, this.game.height * .5 + 100, "quit", 'graphic_smallbutton', 13, "#ffffff", this.quitGame));
+        this.pauseScreen.blockerButton = new Phaser.Button(this.game,0,0,'');
+        this.pauseScreen.blockerButton.width = this.pauseScreen.blockerGraphic.width;
+        this.pauseScreen.blockerButton.height = this.pauseScreen.blockerGraphic.height;
+        this.pauseScreen.blockerButton.onInputDown.add(this.togglePause, this);
+        this.pauseScreen.add(this.pauseScreen.blockerButton);
+
+        this.pauseScreen.popup = this.pauseScreen.add(new Phaser.Group(this.game));
+        this.pauseScreen.popup.x = this.game.width * .5;
+        this.pauseScreen.popup.y = this.game.height * .5;
+
+        this.pauseScreen.popup.add(MenuBackground(this.game, 0, 0, 500, 350));
+
+        var l = Label(this,0, - 80, "PAUSED", 85, "#ffffcc", 'center');
+        this.pauseScreen.popup.add(l);
+        this.pauseScreen.popup.add(ButtonWithText(this,0, 30, "- Continue -", 'graphic_smallbutton', 18, "#ffffff", this.togglePause));
+        this.pauseScreen.popup.add(ButtonWithText(this,0, 100, "- Quit -", 'graphic_smallbutton', 18, "#ffffff", this.quitGame));
 
         this.pauseScreen.visible = false;
 
@@ -172,7 +223,7 @@ BasicGame.Game.prototype = {
 
         this.endGameScreen = new Phaser.Group(this.game);
         this.endGameScreen.x = this.game.width * .5;
-        this.endGameScreen.y = this.game.height * .5 - 70;
+        this.endGameScreen.y = this.game.height * .5;
 
         //// blocker
         g = this.game.add.graphics(0,0, this.endGameScreen);
@@ -186,54 +237,82 @@ BasicGame.Game.prototype = {
         b.onInputDown.add(this.ignore, this);
         this.endGameScreen.add(b);
 
-        this.endGameScreen.title = Label(this,0 , 0, "", 64, "#00ff00", 'center');
+        this.endGameScreen.popup = this.endGameScreen.add(new Phaser.Group(this.game));
+        this.endGameScreen.popup.add(MenuBackground(this.game, 0, 0, 800, 660));
+
+        this.endGameScreen.title = Label(this,0, -150, "", 85, "#ffffcc", 'center');
         this.endGameScreen.title.anchor.set(0.5,1);
-        this.endGameScreen.input = new Phaser.Text(this.game, 80, 15, "| YOUR NAME?   ", { font: "24px Arial", fill: "#ffffff", align: "right" });
+        this.endGameScreen.input = new Phaser.Text(this.game, 120, -105, "| YOUR NAME?   ", { font: "42px Arial", fill: "#ffffff", align: "right" });
         this.endGameScreen.input.anchor.set(1,0.5);
-        this.endGameScreen.hiscore = new Phaser.Text(this.game, 80, 15, this.score.toString().substring(0,4) + "P", { font: "24px Arial", fill: "#000000", align: "left"});
+        this.endGameScreen.hiscore = new Phaser.Text(this.game, 120, -105, this.score.toString().substring(0,4) + "P", { font: "42px Arial", fill: "#000000", align: "left"});
         this.endGameScreen.hiscore.anchor.set(0,0.5);
         this.endGameScreen.hiscoretable = new Phaser.Group(this.game);
         var names = ["Lid shutter", "Killer 2", "Hunter", "Klasse", "Maja"];
         var scores = [7500, 5000, 3500, 2500, 1000];
         for (var i = 0; i < 5; i++) {
             var hiscoreline = new Phaser.Group(this.game);
-            hiscoreline.add(new Phaser.Text(this.game, -10, 0, "0"+i, { font: "10px Arial", fill: "#000000", align: "right"}));
-            hiscoreline.add(new Phaser.Text(this.game, 5, 0, names[i], { font: "10px Arial", fill: "#000000", align: "left"}));
-            hiscoreline.add(new Phaser.Text(this.game, 80, 0, scores[i] + "p", { font: "10px Arial", fill: "#000000", align: "left"}));
-            hiscoreline.position.y = i * 12;
+            hiscoreline.add(new Phaser.Text(this.game, -65, 0, "0"+(i+1), { font: "22px Arial", fill: "#000000", align: "right"}));
+            hiscoreline.add(new Phaser.Text(this.game, -35, 0, names[i], { font: "22px Arial", fill: "#000000", align: "left"}));
+            hiscoreline.add(new Phaser.Text(this.game, 180, 0, scores[i] + "p", { font: "22px Arial", fill: "#000000", align: "left"}));
+            hiscoreline.position.y = -95 + i * 18;
             this.endGameScreen.hiscoretable.add(hiscoreline);
         };
         this.endGameScreen.hiscoretable.x = -this.endGameScreen.hiscoretable.getBounds().width;
         this.endGameScreen.hiscoretable.position.y = 30;
-        this.endGameScreen.button_hiscore = ButtonWithText(this,0, 110, "See high score", 'graphic_longbutton', 13, "#ffffff", this.gotoHiscores);
+        this.endGameScreen.button_hiscore = ButtonWithText(this,0, 70, "- See high scores -", 'graphic_smallbutton', 18, "#ffffff", this.gotoHiscores);
         this.endGameScreen.button_hiscore.scale.set(0.7,0.7);
-        this.endGameScreen.button_restart = ButtonWithText(this,0, 135, "Play Agan", 'graphic_longbutton', 13, "#ffffff", this.restartGame);
+        this.endGameScreen.button_hiscore.alpha = 0.7
+        this.endGameScreen.button_restart = ButtonWithText(this,0, 135, "- Play Again -", 'graphic_longbutton', 28, "#ffffff", this.restartGame);
         this.endGameScreen.button_restart.scale.set(0.7,0.7);
-        var t = new Phaser.Text(this.game, 0, 155, "Ok enough now...\nHave you read about what not to do at work at\nthe responsible business conduct site?", { font: "10px Arial", fill: "#000000", align: 'center' });
+        var t = new Phaser.Text(this.game, 0, 190, "Ok enough now...\nHave you read about what not to do at work at\nthe responsible business conduct site?", { font: "18px Arial", fill: "#000000", align: 'center' });
         t.padding.set(0,-8);
         t.anchor.set(0.5,0);
-        this.endGameScreen.button_www = ButtonWithText(this,0, 210, "website", 'graphic_smallbutton', 13, "#ffffff", this.openWebsite);
-        this.endGameScreen.button_www.scale.set(0.7,0.7);
+        this.endGameScreen.button_www = ButtonWithText(this,0, 285, "- Learn More -", 'graphic_smallbutton', 18, "#ffffff", this.openWebsite);
+        this.endGameScreen.button_www.scale.set(0.85,0.85);
 
 
-        this.endGameScreen.add(this.endGameScreen.title);
-        this.endGameScreen.add(this.endGameScreen.input);
-        this.endGameScreen.add(this.endGameScreen.hiscore);
-        this.endGameScreen.add(this.endGameScreen.hiscoretable);
-        this.endGameScreen.add(this.endGameScreen.button_hiscore);
-        this.endGameScreen.add(this.endGameScreen.button_restart);
-        this.endGameScreen.add(t);
-        this.endGameScreen.add(this.endGameScreen.button_www);
+        this.endGameScreen.popup.add(this.endGameScreen.title);
+        this.endGameScreen.popup.add(this.endGameScreen.input);
+        this.endGameScreen.popup.add(this.endGameScreen.hiscore);
+        this.endGameScreen.popup.add(this.endGameScreen.hiscoretable);
+        this.endGameScreen.popup.add(this.endGameScreen.button_hiscore);
+        this.endGameScreen.popup.add(this.endGameScreen.button_restart);
+        this.endGameScreen.popup.add(t);
+        this.endGameScreen.popup.add(this.endGameScreen.button_www);
         
         
         this.endGameScreen.visible = false;
         //this.game.add.existing(this.endGameScreen);
+
+
+        // feedback
+        this.particles_score10 = this.gameGroup.add(new Phaser.Particles.Arcade.Emitter(this.game,0,0,10));
+        this.particles_score10.makeParticles('game_score10');
+        this.particles_score10.particleAnchor.set(0.5,0.5);
+        this.particles_score10.setRotation(-20,20);
+        this.particles_score10.gravity = 200;
+
+        this.particles_score50 = this.gameGroup.add(new Phaser.Particles.Arcade.Emitter(this.game,0,0,10));
+        this.particles_score50.makeParticles('game_score50');
+        this.particles_score50.particleAnchor.set(0.5,0.5);
+        this.particles_score50.setRotation(-20,20);
+        this.particles_score50.gravity = 200;
+
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
+        this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
+        this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
 
         this.startLevel(0, 500);
 
 	},
 
 	update: function () {
+        if (this.pauseScreen == null)
+            return;
+        
+        this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
+        this.pauseButton.y = this.pauseButton.height*.5 + 10;
 
         if (this.pauseScreen.visible || this.endGameScreen.visible || !this.playing) {
             // paused
@@ -241,6 +320,10 @@ BasicGame.Game.prototype = {
         } else {
             /*if (!BasicGame.orientated)
                 this.togglePause();*/
+            this.turbulence = lerp(this.turbulence, Math.random() * (this.game.time.elapsedMS / 1000) * 4, 0.25);
+
+            this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
+            this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5 + this.turbulence;
 
             var takingDamage = false;
 
@@ -261,6 +344,7 @@ BasicGame.Game.prototype = {
                         } else {
                             this.laptops[i].open = true;
                             // TODO: some visual feedback that the laptop just opened   
+                            this.laptops[i].particles_secrets.on = true;
                         }
 
                     } else {
@@ -270,7 +354,8 @@ BasicGame.Game.prototype = {
                         takingDamage = true;
                     }
                 }
-                this.laptops[i].button.frame = this.laptops[i].open ? 2 : 0;
+                this.laptops[i].openRatio = towards(this.laptops[i].openRatio, this.laptops[i].open ? 1.0 : 0.0, 4.0, this.game.time.elapsedMS / 1000);
+                 this.laptops[i].button.frame = Math.floor(this.laptops[i].openRatio * 5);
             };
 
             for(var i=0; i < this.npcs.length; i++) { 
@@ -278,13 +363,17 @@ BasicGame.Game.prototype = {
                 var t = this.laptops[this.npcs[i].lookAt].counter;
                 //this.npcs[i].sprite.x = (looking ? this.npcs[i].offset.x : 0) * Phaser.Easing.Circular.InOut((this.game.time.elapsedMS / 1000) * 0.25);
                 //this.npcs[i].sprite.y = (looking ? this.npcs[i].offset.y : 0) * Phaser.Easing.Circular.InOut((this.game.time.elapsedMS / 1000) * 0.25);
-                this.npcs[i].sprite.x = lerp(this.npcs[i].sprite.x, (looking ? 0 : this.npcs[i].offset.x), clamp01((this.game.time.elapsedMS / 1000) * 0.75));
-                this.npcs[i].sprite.y = lerp(this.npcs[i].sprite.y, (looking ? 0 : this.npcs[i].offset.y), clamp01((this.game.time.elapsedMS / 1000) * 0.75));
+                
+                var npcx = this.npcs[i].posLooking.x + (looking ? 0 : this.npcs[i].offsetOnIdle.x);
+                var npcy = this.npcs[i].posLooking.y + (looking ? 0 : this.npcs[i].offsetOnIdle.y);
+                this.npcs[i].sprite.x = lerp(this.npcs[i].sprite.x, npcx, clamp01((this.game.time.elapsedMS / 1000) * 0.75));
+                this.npcs[i].sprite.y = lerp(this.npcs[i].sprite.y, npcy, clamp01((this.game.time.elapsedMS / 1000) * 0.75));
+                
             }
 
 
             var d = (this.damage / this.health);
-            this.damageBar.fill.width = this.damageBar.bg.width * d;
+            this.damageBar.fill.width = (this.damageBar.bg.width-12*2) * d;
             //this.damageBar.fill.tint = Phaser.Color.interpolate("#ffffff", "#ff0000", 10, d * 10, 1.0);
 
             if (takingDamage) {
@@ -295,7 +384,7 @@ BasicGame.Game.prototype = {
             }
 
             this.scoreText.text = this.score.toString().split('.')[0] + "P";
-            this.progressText.text = "Level " + this.currentLevelNumber + "  " + this.laptopsPressed + " / " + this.getLevelProperty('laptops_goal');
+            this.progressText.text = "Level " + (this.currentLevelNumber+1) + "  " + this.laptopsPressed + " / " + this.getLevelProperty('laptops_goal');
             
             if(this.damage > this.health) {
                 // lose
@@ -309,7 +398,7 @@ BasicGame.Game.prototype = {
             if(this.laptopsPressed >= this.getLevelProperty('laptops_goal')) {
                 // win
                 this.playing = false;
-                var t = this.tweenLevelText("WIN", 3000); //TODO: localize
+                var t = this.tweenLevelText("LEVEL COMPLETE", 3000); //TODO: localize
                 t.onComplete.add(function(target,tween){
                     this.startLevel(this.currentLevelNumber+1, 3000);
                 },this);
@@ -344,8 +433,13 @@ BasicGame.Game.prototype = {
             this.endGameScreen.title.text = "GAME OVER"; //TODO: localize
         this.endGameScreen.hiscore.text = this.score.toString().split('.')[0] + "p";
 
-        this.game.add.existing(this.endGameScreen);
+        this.uiGroup.add(this.endGameScreen);
         this.endGameScreen.visible = true;
+
+        this.endGameScreen.popup.scale.set(0.1,0.1);
+        var tween1 = this.game.add.tween(this.endGameScreen.popup.scale);
+        tween1.to( {x:1,y:1}, 900, Phaser.Easing.Elastic.Out);
+        tween1.start();
 
         if (this.score > BasicGame.lastScore)
             BasicGame.lastScore = this.score;
@@ -358,20 +452,27 @@ BasicGame.Game.prototype = {
     togglePause: function(pointer) {
 
         this.pauseScreen.visible = !this.pauseScreen.visible;
+        if (this.pauseScreen.visible) {
+            this.pauseScreen.popup.scale.set(0.1,0.1);
+            var tween1 = this.game.add.tween(this.pauseScreen.popup.scale);
+            tween1.to( {x:1,y:1}, 600, Phaser.Easing.Elastic.Out);
+            tween1.start();
+//            tween.onStart.add(function(context,tween){context.})
+        }
     },
     restartGame: function(pointer) {
         this.resetState();
-        this.state.start('Game');
+        TransitionToState('Game', this.stage);
     },
     gotoHiscores: function(pointer) {
-        this.state.start('Leaderboard');
+        TransitionToState('Leaderboard', this.stage);
     },
     openWebsite: function(pointer) {
         window.open("http://www.google.com", "_blank");
     },
     quitGame: function (pointer) {
         this.resetState();
-        this.state.start('MainMenu');
+        TransitionToState('MainMenu', this.stage);
 
     },
     ignore: function(){},
@@ -389,6 +490,7 @@ BasicGame.Game.prototype = {
         this.score = 0;
         this.currentLevelNumber = 0;
         this.laptopsPressed = 0;
+        this.turbulence = 0;
     },
 
     startLevel: function(levelnumber, startDelay) {
@@ -431,9 +533,23 @@ BasicGame.Game.prototype = {
     // gameplay
     closeLaptop: function(laptopObject) {
         laptopObject.open = false;
+        if (laptopObject.counter < 0.5) {
+            this.score += 50;
+            this.particles_score50.position = this.gameGroup.toLocal(this.input.activePointer);
+            this.particles_score50.start(true, 1000, null, 1);
+        } else {
+            this.score += 10;
+            this.particles_score10.position = this.gameGroup.toLocal(this.input.activePointer);
+            this.particles_score10.start(true, 1000, null, 1);
+        }
         this.resetLaptopCounter(laptopObject);
-        this.score += 10;
+        laptopObject.particles_secrets.on = false;
+        laptopObject.openRatio = 0.75;
+
         this.laptopsPressed++;
+
+        
+        
     },
 
     resetLaptopCounter: function(laptopObject) { 

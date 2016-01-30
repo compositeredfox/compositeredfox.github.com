@@ -29,10 +29,13 @@ BasicGame.MainMenu.prototype = {
 
 		//this.sprite_title = this.add.image(this.game.width * .5, this.game.height * .3, 'mainmenu_title').anchor.set(0.5,0.5);
 
-        this.game.add.existing(Label(this, this.game.width * .5, this.game.height * .3, "Game Title", 64, "#ffffec", 'center')); //TODO: localize
+        var title = Label(this, this.game.width * .5, this.game.height * .3, "Game Title", 136, "#a049d5", 'center'); //TODO: localize
+        title.setShadow(0,0,'rgba(0,0,0,0.12)',10);
+        this.game.add.existing(title);
 
-        this.button_start = this.game.add.existing(ButtonWithText(this, this.game.width * .5, this.game.height * 0.65, "Start", 'graphic_longbutton', 15, "#ffffff", this.startGame)); //TODO: localize
-        this.button_hiscores = this.game.add.existing(ButtonWithText(this, this.game.width - 40, this.game.height - 30, "High Scores", 'graphic_smallbutton', 12, "#ffffff", this.openLeaderboards)); //TODO: localize
+        this.button_start = this.game.add.existing(ButtonWithText(this, this.game.width * .5, this.game.height * 0.65, "- Start -", 'graphic_longbutton', 32, "#ffffcc", this.startGame)); //TODO: localize
+        this.button_hiscores = this.game.add.existing(ButtonWithText(this, this.game.width - 90, this.game.height - 30, "- High Scores -", 'graphic_smallbutton', 24, "#ffffff", this.openLeaderboards)); //TODO: localize
+        this.button_hiscores.alpha = 0.7;
 
         this.scale.setResizeCallback(this.gameResized, this);
         this.gameResized();
@@ -42,7 +45,7 @@ BasicGame.MainMenu.prototype = {
 	update: function () {
 
 		//	Do some nice funky main menu effect here
-		this.sprite_airplane.y = this.game.height * .7 + Math.sin(this.game.time.time * 0.0015) * 10;
+		this.sprite_airplane.y = this.game.height * .85 + Math.sin(this.game.time.time * 0.0015) * 10;
 
 		this.clouds[0].x -= (this.game.time.elapsedMS / 1000) * 400;
 		if (this.clouds[0].x < -this.clouds[0].width) {
@@ -55,6 +58,8 @@ BasicGame.MainMenu.prototype = {
 			this.clouds[1].y = this.game.height * (0.55 + Math.random() * 0.3);
 		}
 
+		//console.log(BasicGame.transition.mask.scale.x);
+
 	},
 
 	startGame: function (pointer) {
@@ -63,11 +68,12 @@ BasicGame.MainMenu.prototype = {
 		//this.music.stop();
 
 		//	And start the actual game
-		this.state.start('Game');
+		//this.state.start('Game');
+		TransitionToState('Game', this.stage);
 
 	},
 	openLeaderboards: function (pointer) {
-		this.state.start('Leaderboard');
+		TransitionToState('Leaderboard', this.stage);
 
 	},
 
@@ -79,8 +85,8 @@ BasicGame.MainMenu.prototype = {
 
 		this.button_start.x = this.game.width * .5;
 		this.button_start.y = this.game.height * 0.65;
-        this.button_hiscores.x = this.game.width - 40;
-        this.button_hiscores.y = this.game.height - 30;
+        this.button_hiscores.x = this.game.width - this.button_hiscores.width * .5 - 10;
+        this.button_hiscores.y = this.game.height - this.button_hiscores.height * .5 - 10;
 		
     }
 
