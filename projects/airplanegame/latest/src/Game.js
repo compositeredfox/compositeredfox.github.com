@@ -31,7 +31,7 @@ BasicGame.Game = function (game) {
 
     this.laptops = [];
     this.damage = 0;
-    this.health = 0;
+    this.health = 100;
     this.damageBar = {};
     this.score = 0;
     this.currentLevelNumber = 0;
@@ -63,15 +63,15 @@ BasicGame.Game = function (game) {
     };
     this.config_levels = [
         { laptops_goal: 5, laptop_min_open_delay: 2, laptop_max_open_delay: 5, total_health: 30, damage_speed: 0.5, max_concurrent_laptops:1 },
-        { laptops_goal: 10, laptop_min_open_delay: 1, laptop_max_open_delay: 2, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:2 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
-        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 }
+        { laptops_goal: 10, laptop_min_open_delay: 1, laptop_max_open_delay: 2, total_health: 15, damage_speed: 0.6, max_concurrent_laptops:2 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 }
     ];
 
 };
@@ -321,7 +321,7 @@ BasicGame.Game.prototype = {
 
         UpdateGameCursor(this.game,true);
 
-        this.startLevel(0, 500);
+        this.startLevel(0, 900);
 
 	},
 
@@ -555,6 +555,7 @@ BasicGame.Game.prototype = {
         this.currentLevelNumber = 0;
         this.laptopsPressed = 0;
         this.turbulence = 0;
+        this.health = 100;
     },
 
     startLevel: function(levelnumber, startDelay) {
@@ -563,7 +564,7 @@ BasicGame.Game.prototype = {
         // counters
         //this.damage = 0;
         this.laptopsPressed = 0;
-        this.health = this.getLevelProperty('total_health');
+        //this.health = this.getLevelProperty('total_health');
         //state
         for (var i = 0; i < this.laptops.length; i++) {
             this.resetLaptopCounter(this.laptops[i]);
