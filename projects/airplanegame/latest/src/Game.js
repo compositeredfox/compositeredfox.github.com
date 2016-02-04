@@ -466,7 +466,7 @@ BasicGame.Game.prototype = {
         
     },
 
-    onEndGame() {
+    onEndGame: function() {
         // TODO: some visual feedback you lost
 
         if (this.pauseScreen.visible)
