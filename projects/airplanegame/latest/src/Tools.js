@@ -25,6 +25,18 @@ function ButtonWithText(context, x, y, text, graphic, fontSize, fontColor, onHit
     group.add(t);
     return group;
 }
+function ButtonWithTextOver(context, x, y, text, outFrame, overFrame, fontSize, fontColor, onHit) {
+    var group = new Phaser.Group(context.game);
+    group.position.set(x, y);
+    var b = new Phaser.Button(context.game, 0,0, 'buttons', null, context, overFrame, outFrame, overFrame, outFrame);
+    b.onInputDown.add(onHit, context);
+    b.anchor.set(0.5,0.5);
+    group.add(b);
+    var t = new Phaser.Text(context.game, 0, 3, text, { font: fontSize + "px Helvetica", fill: fontColor, align: "center" }); 
+    t.anchor.set(0.5,0.5);
+    group.add(t);
+    return group;
+}
 
 function lerp(a, b, u) {
     return (1 - u) * a + u * b;
@@ -33,12 +45,12 @@ function towards(a, b, speed, deltatime) {
     if (a==b) return a;
     return clamp01(a + deltatime * speed * (b < a ? -1 : 1));
 }
-
-function clamp01(a) {
-    if (a < 0) a = 0;
-    if (a > 1) a = 1;
+function clamp(a,min,max) {
+    if (a<min) a=min;
+    if (a>max) a=max;
     return a;
 }
+function clamp01(a) { return clamp(a,0,1) }
 
 function TransitionToState(nextState, stage) {
     if (BasicGame.transition.visible)
@@ -131,4 +143,38 @@ function MenuBackground(game, x, y, width, height) {
     g.y = y - height * .5;
 
     return g;
+}
+
+function UpdateProgressBar(game, percentage, tint, scorebar) {
+    var s = scorebar;
+    if (s == null) {
+        s = {};
+        s.group = new Phaser.Group(game);
+        s.l = new Phaser.Image(game,0,0,'level_scorebarL');
+        s.m = new Phaser.Image(game,s.l.width,0,'level_scorebarM');
+        s.r = new Phaser.Image(game,s.m.x+s.l.width,0,'level_scorebarR');
+        s.group.add(s.l);
+        s.group.add(s.m);
+        s.group.add(s.r);
+        s.width = s.m.width;
+    }
+    percentage = clamp01(percentage);
+    s.m.width = s.width * percentage;
+    s.m.x = s.l.width;
+    s.r.x = s.m.x + s.m.width - 1;
+    s.l.tint = s.m.tint = s.r.tint = tint;
+    return s;
+}
+
+function UpdateGameCursor(game, updateOrder) {
+    if (game.device.desktop == false)
+        return;
+    if (updateOrder == true)
+        game.stage.setChildIndex(BasicGame.cursor,game.stage.children.length-1);
+
+    var pos = game.input.activePointer;
+    var speed = (game.time.elapsedMS / 1000) * 12.25;
+    BasicGame.cursor.x = lerp(BasicGame.cursor.x, pos.x, speed);
+    BasicGame.cursor.y = lerp(BasicGame.cursor.y, pos.y, speed);
+
 }

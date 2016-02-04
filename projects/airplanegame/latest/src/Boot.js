@@ -6,7 +6,11 @@ BasicGame = {
     music: null,
 
     /* Your game can check BasicGame.orientated in internal loops to know if it should pause or not */
-    orientated: false
+    orientated: false,
+
+    openLeaderboards: false,
+
+    cheatCodes: true
 
 };
 
@@ -38,6 +42,8 @@ BasicGame.Boot.prototype = {
             this.scale.enterIncorrectOrientation.add(this.enterIncorrectOrientation, this);
             this.scale.leaveIncorrectOrientation.add(this.leaveIncorrectOrientation, this);
         }
+
+        //this.game.canvas.style.cursor = 'none';
 
     },
 

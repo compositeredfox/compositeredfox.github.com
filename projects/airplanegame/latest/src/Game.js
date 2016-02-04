@@ -65,6 +65,13 @@ BasicGame.Game = function (game) {
         { laptops_goal: 5, laptop_min_open_delay: 2, laptop_max_open_delay: 5, total_health: 30, damage_speed: 0.5, max_concurrent_laptops:1 },
         { laptops_goal: 10, laptop_min_open_delay: 1, laptop_max_open_delay: 2, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:2 },
         { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 },
+        { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.7, max_concurrent_laptops:4 }
     ];
 
 };
@@ -139,11 +146,11 @@ BasicGame.Game.prototype = {
             group_characters.add(laptops[i].character);
 
             laptops[i].particles_secrets = new Phaser.Particles.Arcade.Emitter(this.game,0,0,30);
-            laptops[i].particles_secrets.makeParticles(['game_particle_secrets1', 'game_particle_secrets2', 'game_particle_secrets3', 'game_particle_secrets4']);
+            laptops[i].particles_secrets.makeParticles('game_cube',[0,1,2,3,4,5,6,7]);
             laptops[i].particles_secrets.setSize(60,50);
             laptops[i].particles_secrets.particleAnchor.set(0.5,0.5);
             laptops[i].particles_secrets.setRotation(-80,80);
-            laptops[i].particles_secrets.gravity = -100;
+            laptops[i].particles_secrets.gravity = 200;
             laptops[i].particles_secrets.start(false, 1000, 250);
             //laptops[i].particles_secrets.setScale(1,0,1,0,1);
             laptops[i].particles_secrets.on = false;
@@ -152,7 +159,7 @@ BasicGame.Game.prototype = {
             group_laptops.add(laptops[i].particles_secrets);
 
 
-            laptops[i].button = new Phaser.Button(this.game, laptops_positions[i].x,laptops_positions[i].y, 'game_laptop');
+            laptops[i].button = new Phaser.Button(this.game, laptops_positions[i].x,laptops_positions[i].y, (i == 0 || i == 3 ? 'game_laptop' : 'game_laptop2'));
             laptops[i].button.onInputDown.add(this.onHitLaptop, this, 0, laptops[i]);
             laptops[i].button.scale.x = (i>=2?-1:1);
             if (laptops[i].button.scale.x<0) laptops[i].button.anchor.set(1,0);
@@ -164,22 +171,35 @@ BasicGame.Game.prototype = {
         laptops[1].button.moveUp();
         laptops[2].button.moveUp();
         laptops[2].button.moveUp();
-        
-        this.damageBar = {};
-        this.damageBar.group = this.uiGroup.add(new Phaser.Group(this.game));
-        this.damageBar.group.position.set(450, 9);
-        this.damageBar.bg = new Phaser.Image(this.game, 0,0,'game_damagebar_bg');
-        this.damageBar.group.add(this.damageBar.bg);
-        this.damageBar.fill = new Phaser.Image(this.game, 12,8,'game_damagebar_fill');
-        this.damageBar.fill.width = 0;//this.damageBar.bg.width;
-        this.damageBar.fill.height = this.damageBar.bg.height-16;//this.damageBar.bg.width;
-        this.damageBar.group.add(this.damageBar.fill);
-            
-        var style = { font: "36px Pebble", fill: "#000000", align: "left" };
-        this.scoreText = this.uiGroup.add(new Phaser.Text(this.game, 10, 5, "0P", style));
 
-        style = { font: "36px Pebble", fill: "#000000", align: "left" };
-        this.progressText = this.uiGroup.add(new Phaser.Text(this.game, 160, 5, "LEVEL 1  0 / " + this.config_levels[0].laptops_goal, style));
+        /// level details
+
+        this.levelDetails = this.uiGroup.add(new Phaser.Group(this.game));
+        this.levelDetails.position.set(this.game.width * .5, this.game.height);
+
+        var levelDetailsBg = new Phaser.Image(this.game,0,0,'level_detailsbg');
+        levelDetailsBg.anchor.set(0.5,1);
+        this.levelDetails.add(levelDetailsBg);
+
+        var style = { font: "40px Pebble", fill: "#000000", align: "right" };
+        this.scoreText = new Phaser.Text(this.game, 354, -10, "0000", style);
+        this.scoreText.anchor.set(1,1);
+        this.levelDetails.add(this.scoreText);
+
+        style = { font: "40px Pebble", fill: "#000000", align: "right" };
+        this.progressText = new Phaser.Text(this.game, -277, -10, "01", style);
+        this.progressText.anchor.set(1,1);
+        this.levelDetails.add(this.progressText);
+
+        this.damageBarBg = UpdateProgressBar(this.game, 1, 0xf2f2f2, null);
+        this.damageBar = UpdateProgressBar(this.game, 1, 0x32ff00, null);
+
+        this.damageBarBg.group.position.set(-225,-50);
+        this.damageBar.group.position.set(-225,-50);
+        this.levelDetails.add(this.damageBarBg.group); //bg
+        this.levelDetails.add(this.damageBar.group);
+            
+        // pause button
 
         this.pauseButton = this.uiGroup.add(ButtonWithText(this,0,0, "- PAUSE -", 'graphic_smallbutton', 20, 0x000000, this.togglePause));
         this.pauseButton.scale.set(0.8,0.8);
@@ -187,13 +207,15 @@ BasicGame.Game.prototype = {
         this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
         this.pauseButton.y = this.pauseButton.height*.5 + 10;
 
-        this.levelText = Label(this, this.game.width * .5, this.game.height * .5 - 40, "", 110, "#000000", 'center');
-        this.levelText.visible = false;
-        this.uiGroup.add(this.levelText);
+        this.levelNumberText = this.uiGroup.add(new Phaser.Group(this.game));
+        this.levelNumberText.add(new Phaser.Image(this.game,-234 * .5,-65 * .5,'game_level'));
+        this.levelNumberText.textSprite = new Phaser.Sprite(this.game,-234 * .5 + 205,-65 * .5,'game_levelnumber',0);
+        this.levelNumberText.add(this.levelNumberText.textSprite);
+        this.levelNumberText.scale.set(0,0);
+        this.levelNumberText.visible = false;
 
         // Pause screen
         this.pauseScreen = this.uiGroup.add(new Phaser.Group(this.game));
-
 
         this.pauseScreen.blockerGraphic = this.game.add.graphics(0,0, this.pauseScreen);
         this.pauseScreen.blockerGraphic.beginFill("#000000", 0.6);
@@ -222,86 +244,82 @@ BasicGame.Game.prototype = {
         // End Game
 
         this.endGameScreen = new Phaser.Group(this.game);
-        this.endGameScreen.x = this.game.width * .5;
-        this.endGameScreen.y = this.game.height * .5;
 
         //// blocker
-        g = this.game.add.graphics(0,0, this.endGameScreen);
+        this.endGameScreen.blocker = this.endGameScreen.add(new Phaser.Group(this.game));
+        g = this.game.add.graphics(0,0, this.endGameScreen.blocker);
         g.beginFill("#000000", 0.6);
-        g.drawRect(-this.endGameScreen.x,-this.endGameScreen.y, this.game.width, this.game.height);
+        g.drawRect(0,0, this.game.width, this.game.height);
         g.endFill();
 
-        b = new Phaser.Button(this.game,-this.endGameScreen.x,-this.endGameScreen.y,'');
+        b = new Phaser.Button(this.game,0,0,'');
         b.width = g.width;
         b.height = g.height;
         b.onInputDown.add(this.ignore, this);
-        this.endGameScreen.add(b);
+        this.endGameScreen.blocker.add(b);
 
         this.endGameScreen.popup = this.endGameScreen.add(new Phaser.Group(this.game));
-        this.endGameScreen.popup.add(MenuBackground(this.game, 0, 0, 800, 660));
+        //this.endGameScreen.popup.add(MenuBackground(this.game, 0, 0, 800, 660));
+        
+        this.endGameScreen.bg_middle = this.endGameScreen.popup.add(new Phaser.Image(this.game,0,0,'game_end_middle'));
+        this.endGameScreen.bg_middle.anchor.set(0.5,1);
 
-        this.endGameScreen.title = Label(this,0, -150, "", 85, "#ffffcc", 'center');
-        this.endGameScreen.title.anchor.set(0.5,1);
+        this.endGameScreen.bg_gameover = new Phaser.Image(this.game,0,-this.endGameScreen.bg_middle.height,'game_end_top_gameover');
+        this.endGameScreen.bg_gameover.anchor.set(0.5,1);
+        this.endGameScreen.popup.add(this.endGameScreen.bg_gameover);
+
+        this.endGameScreen.bg_hiscore = new Phaser.Image(this.game,0,-this.endGameScreen.bg_middle.height,'game_end_top_hiscore');
+        this.endGameScreen.bg_hiscore.anchor.set(0.5,1);
+        this.endGameScreen.popup.add(this.endGameScreen.bg_hiscore);
+
+        /*
         this.endGameScreen.input = new Phaser.Text(this.game, 120, -105, "| YOUR NAME?   ", { font: "42px Arial", fill: "#ffffff", align: "right" });
         this.endGameScreen.input.anchor.set(1,0.5);
-        this.endGameScreen.hiscore = new Phaser.Text(this.game, 120, -105, this.score.toString().substring(0,4) + "P", { font: "42px Arial", fill: "#000000", align: "left"});
-        this.endGameScreen.hiscore.anchor.set(0,0.5);
-        this.endGameScreen.hiscoretable = new Phaser.Group(this.game);
-        var names = ["Lid shutter", "Killer 2", "Hunter", "Klasse", "Maja"];
-        var scores = [7500, 5000, 3500, 2500, 1000];
-        for (var i = 0; i < 5; i++) {
-            var hiscoreline = new Phaser.Group(this.game);
-            hiscoreline.add(new Phaser.Text(this.game, -65, 0, "0"+(i+1), { font: "22px Arial", fill: "#000000", align: "right"}));
-            hiscoreline.add(new Phaser.Text(this.game, -35, 0, names[i], { font: "22px Arial", fill: "#000000", align: "left"}));
-            hiscoreline.add(new Phaser.Text(this.game, 180, 0, scores[i] + "p", { font: "22px Arial", fill: "#000000", align: "left"}));
-            hiscoreline.position.y = -95 + i * 18;
-            this.endGameScreen.hiscoretable.add(hiscoreline);
-        };
-        this.endGameScreen.hiscoretable.x = -this.endGameScreen.hiscoretable.getBounds().width;
-        this.endGameScreen.hiscoretable.position.y = 30;
-        this.endGameScreen.button_hiscore = ButtonWithText(this,0, 70, "- See high scores -", 'graphic_smallbutton', 18, "#ffffff", this.gotoHiscores);
-        this.endGameScreen.button_hiscore.scale.set(0.7,0.7);
-        this.endGameScreen.button_hiscore.alpha = 0.7
-        this.endGameScreen.button_restart = ButtonWithText(this,0, 135, "- Play Again -", 'graphic_longbutton', 28, "#ffffff", this.restartGame);
-        this.endGameScreen.button_restart.scale.set(0.7,0.7);
-        var t = new Phaser.Text(this.game, 0, 190, "Ok enough now...\nHave you read about what not to do at work at\nthe responsible business conduct site?", { font: "18px Arial", fill: "#000000", align: 'center' });
-        t.padding.set(0,-8);
-        t.anchor.set(0.5,0);
-        this.endGameScreen.button_www = ButtonWithText(this,0, 285, "- Learn More -", 'graphic_smallbutton', 18, "#ffffff", this.openWebsite);
-        this.endGameScreen.button_www.scale.set(0.85,0.85);
-
-
-        this.endGameScreen.popup.add(this.endGameScreen.title);
         this.endGameScreen.popup.add(this.endGameScreen.input);
-        this.endGameScreen.popup.add(this.endGameScreen.hiscore);
-        this.endGameScreen.popup.add(this.endGameScreen.hiscoretable);
-        this.endGameScreen.popup.add(this.endGameScreen.button_hiscore);
-        this.endGameScreen.popup.add(this.endGameScreen.button_restart);
-        this.endGameScreen.popup.add(t);
-        this.endGameScreen.popup.add(this.endGameScreen.button_www);
+        */
+
+        this.endGameScreen.hiscore = this.endGameScreen.popup.add(Label(this, 350, -378 + 20, "", 40, "#000000", 'right'));
+        this.endGameScreen.hiscore.anchor.set(1,1);
         
+        this.endGameScreen.hiscoretable = this.endGameScreen.popup.add(new Phaser.Group(this.game));
+        this.endGameScreen.hiscorelines = [];
+        for (var i = 0; i < 3; i++) {
+            var y = -268 + 20 + 63 * i;
+            this.endGameScreen.hiscorelines[i] = this.endGameScreen.hiscoretable.add(new Phaser.Group(this.game));
+            this.endGameScreen.hiscorelines[i].num = new Phaser.Text(this.game, -314, y, "0"+(i+1), { font: "40px Pebble", fill: "#000000", align: "right"});
+            this.endGameScreen.hiscorelines[i].num.anchor.set(1,1);
+            this.endGameScreen.hiscorelines[i].name = new Phaser.Text(this.game, -292, y, "", { font: "40px Pebble", fill: "#000000", align: "left"});
+            this.endGameScreen.hiscorelines[i].name.anchor.set(0,1);
+            this.endGameScreen.hiscorelines[i].points = new Phaser.Text(this.game, 351, y, "", { font: "40px Pebble", fill: "#000000", align: "left"});
+            this.endGameScreen.hiscorelines[i].points.anchor.set(1,1);
+            this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].num);
+            this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].name);
+            this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].points);
+
+        };
+        this.endGameScreen.button_hiscore = ButtonWithTextOver(this,-230, -66, "SEE HIGH SCORE BOARD", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.gotoHiscores);
+        this.endGameScreen.popup.add(this.endGameScreen.button_hiscore);
+        this.endGameScreen.button_restart = ButtonWithTextOver(this,230, -66, "PLAY AGAIN", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.restartGame);
+        this.endGameScreen.popup.add(this.endGameScreen.button_restart);
+        
+        this.endGameScreen.footer = this.endGameScreen.add(new Phaser.Group(this.game));
+        this.endGameScreen.footer.bg = new Phaser.Image(this.game,0,0,'game_end_footer');
+        this.endGameScreen.footer.bg.anchor.set(0.5,1);
+        this.endGameScreen.footer.button = ButtonWithTextOver(this,232,-75,'VIEW OUR CODE OF CONDUCT', 'button_endgame_url', 'button_endgame_url_over', 12, "#FFFFFF", this.openWebsite);
+        this.endGameScreen.footer.add(this.endGameScreen.footer.bg);
+        this.endGameScreen.footer.add(this.endGameScreen.footer.button);
         
         this.endGameScreen.visible = false;
         //this.game.add.existing(this.endGameScreen);
 
-
         // feedback
-        this.particles_score10 = this.gameGroup.add(new Phaser.Particles.Arcade.Emitter(this.game,0,0,10));
-        this.particles_score10.makeParticles('game_score10');
-        this.particles_score10.particleAnchor.set(0.5,0.5);
-        this.particles_score10.setRotation(-20,20);
-        this.particles_score10.gravity = 200;
-
-        this.particles_score50 = this.gameGroup.add(new Phaser.Particles.Arcade.Emitter(this.game,0,0,10));
-        this.particles_score50.makeParticles('game_score50');
-        this.particles_score50.particleAnchor.set(0.5,0.5);
-        this.particles_score50.setRotation(-20,20);
-        this.particles_score50.gravity = 200;
 
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
         this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
         this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
+
+        UpdateGameCursor(this.game,true);
 
         this.startLevel(0, 500);
 
@@ -314,16 +332,33 @@ BasicGame.Game.prototype = {
         this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
         this.pauseButton.y = this.pauseButton.height*.5 + 10;
 
+        this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
+        this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5 - 55;
+
+        // cheats
+        if (BasicGame.cheatCodes) {
+            if (this.input.keyboard.isDown(Phaser.KeyCode.P)) {
+                this.score = BasicGame.lastScore +1;
+                this.onEndGame();
+            }
+            if (this.input.keyboard.isDown(Phaser.KeyCode.O)) {
+                this.score = BasicGame.lastScore -1;
+                this.onEndGame();
+            }
+        }
+
         if (this.pauseScreen.visible || this.endGameScreen.visible || !this.playing) {
             // paused
 
         } else {
+            if (this.input.keyboard.isDown(Phaser.KeyCode.ESC)) {
+                this.togglePause();
+            }
             /*if (!BasicGame.orientated)
                 this.togglePause();*/
-            this.turbulence = lerp(this.turbulence, Math.random() * (this.game.time.elapsedMS / 1000) * 4, 0.25);
+            this.turbulence = lerp(this.turbulence, Math.random() * 6 + Math.sin(this.game.time.now * 0.005) * 5 * Math.random(), 0.09);
 
-            this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
-            this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5 + this.turbulence;
+            this.gameGroup.y += this.turbulence;
 
             var takingDamage = false;
 
@@ -373,40 +408,50 @@ BasicGame.Game.prototype = {
 
 
             var d = (this.damage / this.health);
-            this.damageBar.fill.width = (this.damageBar.bg.width-12*2) * d;
+            //this.damageBar.fill.width = (this.damageBar.bg.width-12*2) * d;
             //this.damageBar.fill.tint = Phaser.Color.interpolate("#ffffff", "#ff0000", 10, d * 10, 1.0);
+            var color = 0x32ff00;
+            if (1-d < 0.66) color = 0xf19a33;
+            if (1-d < 0.33) color = Phaser.Color.interpolateColor(0xff3264, 0xffbece, 5, 0.5 + Math.sin(this.game.time.now * 0.02) * 0.5,1.0);
 
-            if (takingDamage) {
-                // give some visual feedback
-                this.damageBar.angle = -4 + Math.random() * 8;
-            } else {
-                this.damageBar.angle = 0;
-            }
+            UpdateProgressBar(this.game, 1-d, color, this.damageBar);
 
-            this.scoreText.text = this.score.toString().split('.')[0] + "P";
-            this.progressText.text = "Level " + (this.currentLevelNumber+1) + "  " + this.laptopsPressed + " / " + this.getLevelProperty('laptops_goal');
+            var t = "";
+            if (this.score < 10) t += "0";
+            if (this.score < 100) t += "0";
+            if (this.score < 1000) t += "0";
+            t += Math.floor(this.score).toString();
+            this.scoreText.text = t;
+
+            this.progressText.text = (this.currentLevelNumber < 9 ? "0" : "") + (this.currentLevelNumber+1).toString();
             
             if(this.damage > this.health) {
                 // lose
                 this.playing = false;
-                var t = this.tweenLevelText("GAME OVER", 3000); //TODO: localize
+                this.onEndGame();
+                /*var t = this.tweenLevelText("GAME OVER", 3000); //TODO: localize
                 t.onComplete.add(function(target,tween){
                     this.onEndGame();
                 },this);
-                t.start();
+                t.start();*/
             }
             if(this.laptopsPressed >= this.getLevelProperty('laptops_goal')) {
                 // win
                 this.playing = false;
-                var t = this.tweenLevelText("LEVEL COMPLETE", 3000); //TODO: localize
+                if (this.currentLevelNumber < this.config_levels.length -1)
+                    this.startLevel(this.currentLevelNumber+1, 0);
+                else
+                    this.onEndGame();
+                /*var t = this.tweenLevelText("LEVEL COMPLETE", 3000); //TODO: localize
                 t.onComplete.add(function(target,tween){
-                    this.startLevel(this.currentLevelNumber+1, 3000);
                 },this);
-                t.start();
+                t.start();*/
             }
         }
         
+        //console.log(this.debugSprite);
 
+        UpdateGameCursor(this.game);
 	},
 
     onHitLaptop: function(button, game, laptopObject) {
@@ -427,19 +472,37 @@ BasicGame.Game.prototype = {
         if (this.pauseScreen.visible)
             this.pauseScreen.visible = false;
 
-        if (this.score > BasicGame.lastScore)
-            this.endGameScreen.title.text = "NEW HIGH SCORE"; //TODO: localize
-        else
-            this.endGameScreen.title.text = "GAME OVER"; //TODO: localize
-        this.endGameScreen.hiscore.text = this.score.toString().split('.')[0] + "p";
+        var hiscore = this.score > BasicGame.lastScore;
+
+        this.endGameScreen.bg_hiscore.visible = hiscore;
+        this.endGameScreen.bg_gameover.visible = !this.endGameScreen.bg_hiscore.visible;
+
+        this.endGameScreen.blocker.width = this.game.width;
+        this.endGameScreen.blocker.height = this.game.height;
+        this.endGameScreen.popup.x = this.game.width * .5;
+        this.endGameScreen.popup.y = this.game.height + this.endGameScreen.popup.getBounds().height + 5;
+        this.endGameScreen.footer.x = this.game.width * .5;
+        this.endGameScreen.footer.y = this.game.height + this.endGameScreen.footer.getBounds().height + 5;
+
+        this.endGameScreen.hiscore.visible = !hiscore;
+        var t = "";
+        if (this.score < 10) t += "0";
+        if (this.score < 100) t += "0";
+        if (this.score < 1000) t += "0";
+        t += Math.floor(this.score).toString();
+        this.endGameScreen.hiscore.text = t;
+
+        
+        for(var i = 0; i < 3; i++) {
+            this.endGameScreen.hiscorelines[i].name.text = "SDSFDSF";
+            this.endGameScreen.hiscorelines[i].points.text = "1234";
+        }
 
         this.uiGroup.add(this.endGameScreen);
         this.endGameScreen.visible = true;
 
-        this.endGameScreen.popup.scale.set(0.1,0.1);
-        var tween1 = this.game.add.tween(this.endGameScreen.popup.scale);
-        tween1.to( {x:1,y:1}, 900, Phaser.Easing.Elastic.Out);
-        tween1.start();
+        this.game.add.tween(this.endGameScreen.popup.position).to( {y:this.game.height - 158}, 900, Phaser.Easing.Circular.Out, true);
+        this.game.add.tween(this.endGameScreen.footer.position).to( {y:this.game.height}, 500, Phaser.Easing.Circular.InOut, true, 900);
 
         if (this.score > BasicGame.lastScore)
             BasicGame.lastScore = this.score;
@@ -465,7 +528,8 @@ BasicGame.Game.prototype = {
         TransitionToState('Game', this.stage);
     },
     gotoHiscores: function(pointer) {
-        TransitionToState('Leaderboard', this.stage);
+        TransitionToState('MainMenu', this.stage);
+        BasicGame.openLeaderboards = true;
     },
     openWebsite: function(pointer) {
         window.open("http://www.google.com", "_blank");
@@ -497,7 +561,7 @@ BasicGame.Game.prototype = {
         this.currentLevelNumber = levelnumber;
 
         // counters
-        this.damage = 0;
+        //this.damage = 0;
         this.laptopsPressed = 0;
         this.health = this.getLevelProperty('total_health');
         //state
@@ -516,7 +580,7 @@ BasicGame.Game.prototype = {
         );
 
         // init
-        var t = this.tweenLevelText("LEVEL " + (this.currentLevelNumber + 1), 2000); //TODO: localize
+        var t = this.tweenLevelText(2000);
         t.delay(startDelay);
         /*
         t.chain(this.tweenLevelText("3", 1000));
@@ -535,12 +599,10 @@ BasicGame.Game.prototype = {
         laptopObject.open = false;
         if (laptopObject.counter < 0.5) {
             this.score += 50;
-            this.particles_score50.position = this.gameGroup.toLocal(this.input.activePointer);
-            this.particles_score50.start(true, 1000, null, 1);
+            this.showScore(50);
         } else {
             this.score += 10;
-            this.particles_score10.position = this.gameGroup.toLocal(this.input.activePointer);
-            this.particles_score10.start(true, 1000, null, 1);
+            this.showScore(10);
         }
         this.resetLaptopCounter(laptopObject);
         laptopObject.particles_secrets.on = false;
@@ -564,28 +626,65 @@ BasicGame.Game.prototype = {
         return v;
     },
 
-    tweenLevelText: function(string, duration, autoStart) {
+    tweenLevelText: function(duration, autoStart) {
         if (autoStart == null) autoStart = false;
 
-        var tweenIn = this.game.add.tween(this.levelText.scale);
+        this.levelNumberText.position.set(this.game.width * .5, this.game.height * .5);
+        this.levelNumberText.textSprite.frame = this.currentLevelNumber;
+
+        var tweenIn = this.game.add.tween(this.levelNumberText.scale);
         tweenIn.to( { x:1,y:1 }, duration * 0.1, Phaser.Easing.Circular.Out);
         tweenIn.onStart.add(function(target, tween){ 
-            this.levelText.text = string;
-            this.levelText.visible = true;
-            this.levelText.scale.x = this.levelText.scale.y = 0;
+            this.levelNumberText.visible = true;
+            this.levelNumberText.scale.x = this.levelNumberText.scale.y = 0;
             tween.timeline[tween.current].vStart.x = tween.timeline[tween.current].vStart.y = 0; //update the initial value (onStart gets called after the tween gets the current value)
         }, this);
 
-        var tweenOut = this.game.add.tween(this.levelText.scale);
+        var tweenOut = this.game.add.tween(this.levelNumberText.scale);
         tweenOut.to( { x:0,y:0 }, duration * 0.1, Phaser.Easing.Circular.In, false, duration * 0.8);
         tweenOut.onComplete.add(function(target, tween){ 
-            this.levelText.visible = false;
+            this.levelNumberText.visible = false;
         }, this);
 
         tweenIn.chain(tweenOut);
 
         return tweenIn;
 
+    },
+    showScore: function(amount) {
+        this.score += 50;
+        var pos = this.gameGroup.toLocal(this.input.activePointer);
+        var img = '';
+        if (amount == 10) img = 'game_points10';
+        if (amount == 20) img = 'game_points20';
+        if (amount == 50) img = 'game_points50';
+        if (amount == 100) img = 'game_points100';
+
+        var duration = 600;
+
+        var pointSprite = new Phaser.Image(this.game, pos.x, pos.y, img);
+        pointSprite.anchor.set(0.5,0.5);
+        pointSprite.scale.set(0,0);
+        this.gameGroup.add(pointSprite);
+        var tween1 = this.game.add.tween(pointSprite.position);
+        tween1.to({y:pointSprite.y - 100}, duration, Phaser.Easing.Linear.None, true);
+
+        var tween2 = this.game.add.tween(pointSprite.scale);
+        tween2.to({x:0.2,y:0.2}, duration, Phaser.Easing.Elastic.Out, true, 0, 0, true);
+        tween2.onStart.add(function(target,tween,sprite){sprite.scale.set(0,0)}, this, 0, pointSprite);
+        tween2.onComplete.add(function(target,tween,sprite){sprite.destroy();}, this, 0, pointSprite);
+
+    },
+
+    onGameResize: function() {
+        this.levelDetails.position.set(this.game.width * .5, this.game.height);
+        this.endGameScreen.x = this.game.width * .5;
+        this.endGameScreen.y = this.game.height * .5;
+        this.pauseScreen.popup.x = this.game.width * .5;
+        this.pauseScreen.popup.y = this.game.height * .5;
+
+        this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
+        this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
     }
 
 };

@@ -36,6 +36,7 @@ BasicGame.Preloader.prototype = {
 
 		this.load.image('graphic_longbutton', 'images/graphic_longbutton.png');
 		this.load.image('graphic_smallbutton', 'images/graphic_smallbutton.png');
+		this.load.atlas('buttons', 'images/buttons.png', 'images/buttons.json');
 
 		this.load.image('transition_bg', 'images/transition_bg.png');
 		this.load.image('popupbg_corner', 'images/popupbg_corner.png');
@@ -47,6 +48,7 @@ BasicGame.Preloader.prototype = {
 		this.load.image('mainmenu_cloud', 'images/mainmenu_cloud.png');
 		this.load.image('mainmenu_plane', 'images/mainmenu_plane.png');
 		this.load.image('mainmenu_title', 'images/mainmenu_title.png');
+		this.load.image('mainmenu_footer', 'images/mainmenu_footer.png');
 
 		this.load.image('game_bg', 'images/game_bg.png');
 		this.load.image('game_sky', 'images/game_sky.png');
@@ -65,18 +67,32 @@ BasicGame.Preloader.prototype = {
 		this.load.image('game_row1_char2', 'images/game_row1_char2.png');
 		this.load.image('game_row1_char1', 'images/game_row1_char1.png');
 
+		this.load.image('level_detailsbg', 'images/level_detailsbg.png');
+		this.load.image('level_scorebarL', 'images/level_scorebarL.png');
+		this.load.image('level_scorebarM', 'images/level_scorebarM.png');
+		this.load.image('level_scorebarR', 'images/level_scorebarR.png');
+
 		this.load.atlas('game_laptop', 'images/game_laptop.png', 'images/game_laptop.json');
-		this.load.image('game_damagebar_bg', 'images/game_damagebar_bg.png');
-		this.load.image('game_damagebar_fill', 'images/game_damagebar_fill.png');
-		this.load.image('game_damagebar_mask', 'images/game_damagebar_mask.png');
+		this.load.atlas('game_laptop2', 'images/game_laptop2.png', 'images/game_laptop2.json');
+		this.load.atlas('game_cube', 'images/game_cube.png', 'images/game_cube.json');
 		this.load.image('game_chairs2', 'images/game_chairs2.png');
 		this.load.image('game_chairs3', 'images/game_chairs3.png');
-		this.load.image('game_score10', 'images/game_score10.png');
-		this.load.image('game_score50', 'images/game_score50.png');
-		this.load.image('game_particle_secrets1', 'images/game_particle_secrets1.png');
-		this.load.image('game_particle_secrets2', 'images/game_particle_secrets2.png');
-		this.load.image('game_particle_secrets3', 'images/game_particle_secrets3.png');
-		this.load.image('game_particle_secrets4', 'images/game_particle_secrets4.png');
+		this.load.image('game_points10', 'images/game_points10.png');
+		this.load.image('game_points20', 'images/game_points20.png');
+		this.load.image('game_points50', 'images/game_points50.png');
+		this.load.image('game_points100', 'images/game_points100.png');
+		this.load.image('game_level', 'images/game_level.png');
+		this.load.atlas('game_levelnumber', 'images/game_levelnumber.png', 'images/game_levelnumber.json');
+		this.load.image('game_finger', 'images/game_finger.png');
+
+		this.load.image('game_end_footer', 'images/game_end_footer.png');
+		this.load.image('game_end_middle', 'images/game_end_middle.png');
+		this.load.image('game_end_top_hiscore', 'images/game_end_top_hiscore.png');
+		this.load.image('game_end_top_gameover', 'images/game_end_top_gameover.png');
+
+		this.load.image('leaderboards_close', 'images/leaderboards_close.png');
+		this.load.image('leaderboards_separator', 'images/leaderboards_separator.png');
+		this.load.image('leaderboards_top', 'images/leaderboards_top.png');
 
 		/*
 		this.load.atlas('playButton', 'images/play_button.png', 'images/play_button.json');
@@ -140,6 +156,14 @@ BasicGame.Preloader.prototype = {
 			BasicGame.transition.add(BasicGame.transition.mask);
 			*/
 			BasicGame.transition.visible = false;
+
+			if (this.game.device.desktop) {
+				BasicGame.cursor = new Phaser.Image(this.game,this.game.width,this.game.height,'game_finger');
+				BasicGame.cursor.anchor.set(0.13,0.09);
+				this.stage.addChildAt(BasicGame.cursor,this.stage.children.length-1);
+
+				BasicGame.cursor.visible = false;
+			}
 			
 			TransitionToState('MainMenu', this.stage);
 		}

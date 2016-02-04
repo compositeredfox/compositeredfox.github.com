@@ -12,7 +12,7 @@ BasicGame.Leaderboard.prototype = {
         bg.width = this.game.width;
         bg.height = this.game.height;
 
-        this.game.add.existing(ButtonWithText(this, 100, 35, "Main Menu", 'graphic_longbutton', 15, "#ffffff", this.gotoMainMenu)); //TODO: localize
+        this.game.add.existing(ButtonWithText(this, 100, 35, "Main Menu", 'graphic_longbutton', '', 15, "#ffffff", this.gotoMainMenu)); //TODO: localize
 
         this.table = new Phaser.Group(this.game);
 
@@ -37,10 +37,12 @@ BasicGame.Leaderboard.prototype = {
         this.table.x = this.game.width * .5;
         this.table.y = 105;
 
+        UpdateGameCursor(this.game, true);
 
     },
 
     update: function () {
+        UpdateGameCursor(this.game);
 
     },
 
