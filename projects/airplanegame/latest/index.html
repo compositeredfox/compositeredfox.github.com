@@ -43,12 +43,20 @@
 
 	<div id="game"></div>
 	<div id="orientation"></div>
+	<div id="hiscore">
+		<form>
+			<input type="text" name="Name" value="Your Name" /> <br/>
+			<input type="submit" name="submit" value="Submit" />
+		</form>
+	</div>
 
 <script type="text/javascript">
 
 (function () {
+	var metrics = Utils.ScreenUtils.calculateScreenMetrics(1920, 1080, Utils.Orientation.LANDSCAPE);
 
-	var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game');
+	console.log("Starting game " + metrics.gameWidth+"x"+metris.gameHeight);
+	var game = new Phaser.Game(metrics.gameWidth, metrics.gameHeight, Phaser.AUTO, 'game');
 
 	game.state.add('Boot', BasicGame.Boot);
 	game.state.add('Preloader', BasicGame.Preloader);

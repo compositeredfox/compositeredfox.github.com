@@ -28,6 +28,7 @@ BasicGame.Game = function (game) {
     this.endGameScreen = null;
     this.levelText = null;
     this.sprites = {};
+    this.music = null;
 
     this.laptops = [];
     this.damage = 0;
@@ -59,7 +60,9 @@ BasicGame.Game = function (game) {
         damage_speed: 1, // laptop damage when open, in units per second
         max_concurrent_laptops: 4,
 
-        laptops_goal: 10 // how many laptops to close for the level to be complete
+        laptops_goal: 10, // how many laptops to close for the level to be complete
+
+        laptop_specialcontentchance: 0.25
     };
     this.config_levels = [
         { laptops_goal: 5, laptop_min_open_delay: 2, laptop_max_open_delay: 5, total_health: 30, damage_speed: 0.5, max_concurrent_laptops:1 },
@@ -88,6 +91,8 @@ BasicGame.Game.prototype = {
         var h = this.game.height;
 
 
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
         this.gameGroup = this.game.add.group();
         this.uiGroup = this.game.add.group();
 
@@ -113,8 +118,15 @@ BasicGame.Game.prototype = {
 
         this.gameGroup.add(new Phaser.Image(this.game, 483,463,'game_chairs3'));
 
+        var gameAreaClicker = this.gameGroup.add(new Phaser.Button(this.game,0,0,''));
+        gameAreaClicker.width = 1920;
+        gameAreaClicker.height = 1080;
+        gameAreaClicker.texture.baseTexture.skipRender = false;
+        gameAreaClicker.onInputDown.add(this.onHitGameArea, this);
+
         var group_characters = this.gameGroup.add(new Phaser.Group(this.game));
-        var group_laptops = this.gameGroup.add(new Phaser.Group(this.game));
+        this.group_laptops = this.gameGroup.add(new Phaser.Group(this.game));
+        this.group_collisions = this.gameGroup.add(new Phaser.Group(this.game));
 
         laptops = this.laptops;
         var laptops_positions = [
@@ -145,25 +157,50 @@ BasicGame.Game.prototype = {
 
             group_characters.add(laptops[i].character);
 
-            laptops[i].particles_secrets = new Phaser.Particles.Arcade.Emitter(this.game,0,0,30);
-            laptops[i].particles_secrets.makeParticles('game_cube',[0,1,2,3,4,5,6,7]);
-            laptops[i].particles_secrets.setSize(60,50);
+            laptops[i].particles_secrets = new Phaser.Particles.Arcade.Emitter(this.game,0,0,50);
+            laptops[i].particles_secrets.makeParticles('game_cube',[0,1,2,3,4,5,6,7],50,true,false);
+            laptops[i].particles_secrets.setSize(40,30);
             laptops[i].particles_secrets.particleAnchor.set(0.5,0.5);
+            laptops[i].particles_secrets.minParticleSpeed.setTo(-150, -300);
+            laptops[i].particles_secrets.maxParticleSpeed.setTo(150, -400);
+            laptops[i].particles_secrets.minParticleScale = 0.8;
+            laptops[i].particles_secrets.maxParticleScale = 0.8;
+            laptops[i].particles_secrets.bounce.setTo(0.9,0.9);
             laptops[i].particles_secrets.setRotation(-80,80);
-            laptops[i].particles_secrets.gravity = 200;
-            laptops[i].particles_secrets.start(false, 1000, 250);
-            //laptops[i].particles_secrets.setScale(1,0,1,0,1);
+            laptops[i].particles_secrets.gravity = 800;
+            laptops[i].particles_secrets.start(false, 1400, 320);
             laptops[i].particles_secrets.on = false;
-            laptops[i].particles_secrets.x = laptops_positions[i].x + 80;
+            laptops[i].particles_secrets.x = laptops_positions[i].x + 90;
             laptops[i].particles_secrets.y = laptops_positions[i].y + 70;
-            group_laptops.add(laptops[i].particles_secrets);
+            this.group_laptops.add(laptops[i].particles_secrets);
 
+            laptops[i].particles_secrets_special = new Phaser.Particles.Arcade.Emitter(this.game,0,0,30);
+            laptops[i].particles_secrets_special.makeParticles('game_specialcontent',0,30,true,false);
+            laptops[i].particles_secrets_special.setSize(40,30);
+            laptops[i].particles_secrets_special.particleAnchor.set(0.5,0.5);
+            laptops[i].particles_secrets_special.minParticleSpeed.setTo(-150, -300);
+            laptops[i].particles_secrets_special.maxParticleSpeed.setTo(150, -400);
+            laptops[i].particles_secrets_special.minParticleScale = 0.33;
+            laptops[i].particles_secrets_special.maxParticleScale = 0.33;
+            laptops[i].particles_secrets_special.bounce.setTo(0.9,0.9);
+            laptops[i].particles_secrets_special.setRotation(-80,80);
+            laptops[i].particles_secrets_special.gravity = 800;
+            laptops[i].particles_secrets_special.start(false, 1400, 320);
+            laptops[i].particles_secrets_special.on = false;
+            laptops[i].particles_secrets_special.x = laptops_positions[i].x + 90;
+            laptops[i].particles_secrets_special.y = laptops_positions[i].y + 70;
+            this.group_laptops.add(laptops[i].particles_secrets_special);
+
+            var c = this.getInvisibleBody(laptops_positions[i].x + 50, laptops_positions[i].y + 75, 140, 40);
+            c.x -= 40 * (i>=2?1:0);
+            this.group_collisions.add(c);
+            c.body.bounce.setTo(2,2);
 
             laptops[i].button = new Phaser.Button(this.game, laptops_positions[i].x,laptops_positions[i].y, (i == 0 || i == 3 ? 'game_laptop' : 'game_laptop2'));
             laptops[i].button.onInputDown.add(this.onHitLaptop, this, 0, laptops[i]);
             laptops[i].button.scale.x = (i>=2?-1:1);
             if (laptops[i].button.scale.x<0) laptops[i].button.anchor.set(1,0);
-            group_laptops.add(laptops[i].button);
+            this.group_laptops.add(laptops[i].button);
             laptops[i].openRatio = laptops[i].button.frame = 0;
 
             
@@ -171,6 +208,20 @@ BasicGame.Game.prototype = {
         laptops[1].button.moveUp();
         laptops[2].button.moveUp();
         laptops[2].button.moveUp();
+
+        // collision inside
+        
+        var inside = new Phaser.Rectangle(444, 0, 1017, 825);
+        var walls = [
+            new Phaser.Rectangle(0,0,1920 - inside.x - inside.width,inside.height),
+            new Phaser.Rectangle(0,inside.height,1920,1080-inside.height),
+            new Phaser.Rectangle(inside.x + inside.width,0,1920-inside.x-inside.width,inside.height)
+        ];
+        for (var i = 0; i < walls.length; i++) {
+            this.group_collisions.add(this.getInvisibleBody(walls[i].x,walls[i].y,walls[i].width,walls[i].height));
+        };
+
+        // collision on laptops
 
         /// level details
 
@@ -314,7 +365,8 @@ BasicGame.Game.prototype = {
 
         // feedback
 
-        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+        
+
 
         this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
         this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
@@ -322,6 +374,8 @@ BasicGame.Game.prototype = {
         UpdateGameCursor(this.game,true);
 
         this.startLevel(0, 900);
+
+        this.game.input.keyboard.addCallbacks(this, this.onKeyDown);
 
 	},
 
@@ -335,25 +389,15 @@ BasicGame.Game.prototype = {
         this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
         this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5 - 55;
 
-        // cheats
-        if (BasicGame.cheatCodes) {
-            if (this.input.keyboard.isDown(Phaser.KeyCode.P)) {
-                this.score = BasicGame.lastScore +1;
-                this.onEndGame();
-            }
-            if (this.input.keyboard.isDown(Phaser.KeyCode.O)) {
-                this.score = BasicGame.lastScore -1;
-                this.onEndGame();
-            }
-        }
+
 
         if (this.pauseScreen.visible || this.endGameScreen.visible || !this.playing) {
             // paused
 
         } else {
-            if (this.input.keyboard.isDown(Phaser.KeyCode.ESC)) {
-                this.togglePause();
-            }
+            
+            this.game.physics.arcade.collide(this.group_laptops, this.group_collisions);
+
             /*if (!BasicGame.orientated)
                 this.togglePause();*/
             this.turbulence = lerp(this.turbulence, Math.random() * 6 + Math.sin(this.game.time.now * 0.005) * 5 * Math.random(), 0.09);
@@ -378,8 +422,11 @@ BasicGame.Game.prototype = {
                             this.resetLaptopCounter(this.laptops[i]);
                         } else {
                             this.laptops[i].open = true;
-                            // TODO: some visual feedback that the laptop just opened   
-                            this.laptops[i].particles_secrets.on = true;
+                            var special = Math.random() < this.getLevelProperty('laptop_specialcontentchance');
+                            this.laptops[i].particles_secrets.on = !special;
+                            this.laptops[i].particles_secrets_special.on = special;
+
+                            this.sound.play('laptopOpen');
                         }
 
                     } else {
@@ -390,7 +437,15 @@ BasicGame.Game.prototype = {
                     }
                 }
                 this.laptops[i].openRatio = towards(this.laptops[i].openRatio, this.laptops[i].open ? 1.0 : 0.0, 4.0, this.game.time.elapsedMS / 1000);
-                 this.laptops[i].button.frame = Math.floor(this.laptops[i].openRatio * 5);
+                this.laptops[i].button.frame = Math.floor(this.laptops[i].openRatio * 5);
+
+                var emitter = this.laptops[i].particles_secrets_special.on ? this.laptops[i].particles_secrets_special : this.laptops[i].particles_secrets;
+                if (emitter.on) {
+                    emitter.forEachAlive(function(p){
+                        var s = emitter.maxParticleScale * Phaser.Easing.Circular.Out(p.lifespan/emitter.lifespan);
+                        p.scale.setTo(s,s);
+                    });
+                }
             };
 
             for(var i=0; i < this.npcs.length; i++) { 
@@ -454,6 +509,25 @@ BasicGame.Game.prototype = {
         UpdateGameCursor(this.game);
 	},
 
+    getInvisibleBody: function(x,y,width,height) {
+        var s = new Phaser.Sprite(this.game,x,y,'transition_bg');
+        this.game.physics.enable(s);
+        //s.texture.baseTexture.skipRender = true;
+        s.renderable = false;
+        s.alpha = 0.8;
+        s.width = width;
+        s.height = height;
+        s.body.allowGravity = false;
+        s.body.immovable = true;
+        s.body.bounce.setTo(0.8,0.8);
+        return s;
+    },
+
+    onHitGameArea: function(button) {
+        this.sound.play('negativePoint');
+        console.log('onHitGameArea');
+    },
+
     onHitLaptop: function(button, game, laptopObject) {
         //console.log("hit laptop " + laptopObject);
         if (laptopObject.open) {
@@ -504,8 +578,18 @@ BasicGame.Game.prototype = {
         this.game.add.tween(this.endGameScreen.popup.position).to( {y:this.game.height - 158}, 900, Phaser.Easing.Circular.Out, true);
         this.game.add.tween(this.endGameScreen.footer.position).to( {y:this.game.height}, 500, Phaser.Easing.Circular.InOut, true, 900);
 
-        if (this.score > BasicGame.lastScore)
+        if (hiscore) {
             BasicGame.lastScore = this.score;
+
+            this.sound.play('highScore');
+        } else {
+            this.sound.play('gameOver');
+
+        }
+
+        this.game.add.tween(this.music).to({volume:0}, 300).start()
+        this.music = this.sound.play('startScreen', 1, true);
+        this.music.onDecoded.add(function(sound){ sound.volume = 0; sound.game.add.tween(sound).to({volume:1}, 400).start()});
     },
 
     toggleFullScreen: function(button) {
@@ -522,12 +606,15 @@ BasicGame.Game.prototype = {
             tween1.start();
 //            tween.onStart.add(function(context,tween){context.})
         }
+        this.music.fadeTo(200, this.pauseScreen.visible ? 0.05 : 1);
     },
     restartGame: function(pointer) {
         this.resetState();
+        this.game.add.tween(this.music).to({volume:0}, 300).start()
         TransitionToState('Game', this.stage);
     },
     gotoHiscores: function(pointer) {
+        this.game.add.tween(this.music).to({volume:0}, 300).start()
         TransitionToState('MainMenu', this.stage);
         BasicGame.openLeaderboards = true;
     },
@@ -536,6 +623,7 @@ BasicGame.Game.prototype = {
     },
     quitGame: function (pointer) {
         this.resetState();
+        this.game.add.tween(this.music).to({volume:0}, 300).start()
         TransitionToState('MainMenu', this.stage);
 
     },
@@ -556,6 +644,8 @@ BasicGame.Game.prototype = {
         this.laptopsPressed = 0;
         this.turbulence = 0;
         this.health = 100;
+
+        this.feedback_gratificationCounter = 0;
     },
 
     startLevel: function(levelnumber, startDelay) {
@@ -592,26 +682,53 @@ BasicGame.Game.prototype = {
         t.onComplete.add(function(target,tween){this.playing=true;},this);
         t.start();
 
+        var levelmusic = ['level01', 'level02', 'level02', 'level03', 'level03', 'level04', 'level04', 'level05', 'level05', 'level06'];
+        var newmusic = levelmusic[levelnumber];
+        
+        if (this.music == null || (this.music != null && this.music.key != newmusic)) {
+            var pos = 0;
+            if (this.music != null) {
+                pos = this.music.position;
+                this.game.add.tween(this.music).to({volume:0}, 300).start()
+            }
+            this.music = this.sound.play(levelmusic[levelnumber], 1, true);
+            this.music.position = pos;
+            this.music.onDecoded.add(function(sound){ sound.volume = 0; sound.game.add.tween(sound).to({volume:1}, 500).start()});
+        }
 
     },
 	
     // gameplay
     closeLaptop: function(laptopObject) {
         laptopObject.open = false;
+        var special = laptopObject.particles_secrets_special.on == true;
+
+        var score = 10;
+        if (special)
+            score = 100;
         if (laptopObject.counter < 0.5) {
-            this.score += 50;
-            this.showScore(50);
-        } else {
-            this.score += 10;
-            this.showScore(10);
+            score = 50;
+            if (special == true)
+                score = 100;
         }
+
+        this.score += score;
+        this.showScore(score);
+
         this.resetLaptopCounter(laptopObject);
         laptopObject.particles_secrets.on = false;
+        laptopObject.particles_secrets_special.on = false;
         laptopObject.openRatio = 0.75;
 
         this.laptopsPressed++;
 
         
+        if (this.feedback_gratificationCounter++ > 5) {
+            this.feedback_gratificationCounter = 0;
+            this.tweenGratification();
+        }
+
+        this.sound.play('positivePoint');
         
     },
 
@@ -639,6 +756,7 @@ BasicGame.Game.prototype = {
             this.levelNumberText.visible = true;
             this.levelNumberText.scale.x = this.levelNumberText.scale.y = 0;
             tween.timeline[tween.current].vStart.x = tween.timeline[tween.current].vStart.y = 0; //update the initial value (onStart gets called after the tween gets the current value)
+            this.sound.play('gameLevel');
         }, this);
 
         var tweenOut = this.game.add.tween(this.levelNumberText.scale);
@@ -650,6 +768,33 @@ BasicGame.Game.prototype = {
         tweenIn.chain(tweenOut);
 
         return tweenIn;
+
+    },
+    tweenGratification: function() {
+        var sprites = ['game_gratification1', 'game_gratification2','game_gratification3','game_gratification4','game_gratification5'];
+        var s = this.uiGroup.add(new Phaser.Image(this.game,0,0,sprites[Math.round(Math.random() * (sprites.length -1))]));
+        s.anchor.set(0.5,0.5);
+        s.x = this.game.width * .5;
+        s.y = this.game.height * .38;
+        s.scale.set(0.6,0.6);
+
+        var duration = 1200;
+
+        var tweenIn = this.game.add.tween(s.scale);
+        tweenIn.to( { x:.7,y:.7 }, duration * 0.6, Phaser.Easing.Elastic.Out);
+        tweenIn.onStart.add(function(target, tween, sprite){ 
+            sprite.scale.set(0,0);
+            tween.timeline[tween.current].vStart.x = tween.timeline[tween.current].vStart.y = 0;
+        }, this, 0, s);
+
+        var tweenOut = this.game.add.tween(s.scale);
+        tweenOut.to( { x:0,y:0 }, duration * 0.2, Phaser.Easing.Circular.In, false, duration * 0.2);
+        tweenOut.onComplete.add(function(target, tween, sprite){ 
+            sprite.destroy()
+        }, this, 0, s);
+
+        tweenIn.chain(tweenOut);
+        tweenIn.start();
 
     },
     showScore: function(amount) {
@@ -686,6 +831,35 @@ BasicGame.Game.prototype = {
 
         this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
         this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
+    },
+
+    onKeyDown: function(event) {
+        console.log('key down ' + event.keyCode);
+        var k = event.keyCode;
+        if (k == Phaser.KeyCode.ESC) {
+            this.togglePause();
+        }
+        // cheats
+        if (BasicGame.cheatCodes) {
+            if (k == Phaser.KeyCode.P) {
+                this.score = BasicGame.lastScore +1;
+                this.onEndGame();
+            }
+            if (k == Phaser.KeyCode.O) {
+                this.score = BasicGame.lastScore -1;
+                this.onEndGame();
+            }
+            if (k == Phaser.KeyCode.I) {
+                this.playing = false;
+                if (this.currentLevelNumber < this.config_levels.length -1)
+                    this.startLevel(this.currentLevelNumber+1, 0);
+                else
+                    this.onEndGame();
+            }
+            if (k == Phaser.KeyCode.U) {
+                this.tweenGratification();
+            }
+        }
     }
 
 };

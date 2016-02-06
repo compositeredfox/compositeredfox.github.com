@@ -1,12 +1,12 @@
 
 BasicGame.MainMenu = function (game) {
 
-	this.music = null;
 	this.sprite_title = null;
 	this.sprite_airplane = null;
 	this.playButton = null;
 	this.leaderboards = null;
 	this._dragStartY = 0;
+	this.music = null;
 
 	this.clouds = [];
 
@@ -114,11 +114,15 @@ BasicGame.MainMenu.prototype = {
         	this.openLeaderboards();
         BasicGame.openLeaderboards = false;
 
+        this.music = this.sound.play('startScreen', 1, true);
+        // fade in with fix for looping on chrome (doesn't work with built in fade in)
+        this.music.onDecoded.add(function(sound){ sound.volume = 0; sound.game.add.tween(sound).to({volume:1}, 500).start()});
+        //this.music.onLoop.add(this.loopMusic, this);
+
 	},
 
 	update: function () {
 
-		//	Do some nice funky main menu effect here
 		this.sprite_airplane.y = this.game.height * .75 + Math.sin(this.game.time.time * 0.0015) * 10;
 
 		this.clouds[0].x -= (this.game.time.elapsedMS / 1000) * 400;
@@ -145,11 +149,11 @@ BasicGame.MainMenu.prototype = {
 
 	startGame: function (pointer) {
 
-		//	Ok, the Play Button has been clicked or touched, so let's stop the music (otherwise it'll carry on playing)
-		//this.music.stop();
 
-		//	And start the actual game
-		//this.state.start('Game');
+		if (!this.music.isDecoded) 
+			this.music.destroy();
+		else
+			this.game.add.tween(this.music).to({volume:0}, 300).start()
 		TransitionToState('Game', this.stage);
 
 	},
@@ -216,5 +220,6 @@ BasicGame.MainMenu.prototype = {
         this.leaderboards.x = this.game.width * .5;
         this.leaderboards.y = clamp(this.leaderboards.y, -99999,this.game.height);
     }
+
 
 };

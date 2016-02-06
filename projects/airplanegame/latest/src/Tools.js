@@ -80,6 +80,8 @@ function TransitionToState(nextState, stage) {
         BasicGame.transition.bg.y = tween.game.stage.height;
     }, this);
     tweenIn.onComplete.add(function(context, tween){ 
+        tween.game.sound.stopAll();
+        tween.game.tweens.removeAll();
         tween.game.state.start(nextState);
         tween.game.state.onStateChange.add(TransitionFromState, tween.game.state, 0, tween.game);
     }, this);

@@ -19,7 +19,7 @@ BasicGame.Preloader.prototype = {
 		this.background.width = this.game.width;
 		this.background.height = this.game.height;
 
-		this.preloadText = this.game.add.existing(Label(this, this.game.width * .5, this.game.height * .5, "Loading...", 55, "#ffffec", 'center')); //TODO: localize
+		this.preloadText = this.game.add.existing(Label(this, this.game.width * .5, this.game.height * .5, "Loading...", 55, "#ffffec", 'center'));
 
 		/*
 		this.preloadBar = this.add.sprite(0, 0, 'preloaderBar');
@@ -67,6 +67,12 @@ BasicGame.Preloader.prototype = {
 		this.load.image('game_row1_char2', 'images/game_row1_char2.png');
 		this.load.image('game_row1_char1', 'images/game_row1_char1.png');
 
+		this.load.image('game_gratification1', 'images/game_gratification1.png');
+		this.load.image('game_gratification2', 'images/game_gratification2.png');
+		this.load.image('game_gratification3', 'images/game_gratification3.png');
+		this.load.image('game_gratification4', 'images/game_gratification4.png');
+		this.load.image('game_gratification5', 'images/game_gratification5.png');
+
 		this.load.image('level_detailsbg', 'images/level_detailsbg.png');
 		this.load.image('level_scorebarL', 'images/level_scorebarL.png');
 		this.load.image('level_scorebarM', 'images/level_scorebarM.png');
@@ -75,6 +81,7 @@ BasicGame.Preloader.prototype = {
 		this.load.atlas('game_laptop', 'images/game_laptop.png', 'images/game_laptop.json');
 		this.load.atlas('game_laptop2', 'images/game_laptop2.png', 'images/game_laptop2.json');
 		this.load.atlas('game_cube', 'images/game_cube.png', 'images/game_cube.json');
+		this.load.image('game_specialcontent', 'images/game_specialcontent.png');
 		this.load.image('game_chairs2', 'images/game_chairs2.png');
 		this.load.image('game_chairs3', 'images/game_chairs3.png');
 		this.load.image('game_points10', 'images/game_points10.png');
@@ -93,6 +100,20 @@ BasicGame.Preloader.prototype = {
 		this.load.image('leaderboards_close', 'images/leaderboards_close.png');
 		this.load.image('leaderboards_separator', 'images/leaderboards_separator.png');
 		this.load.image('leaderboards_top', 'images/leaderboards_top.png');
+
+		this.load.audio('gameLevel', ['audio/gameLevel.mp3', 'audio/gameLevel.ogg', 'audio/gameLevel.m4a']);
+		this.load.audio('gameOver', ['audio/gameOver.mp3', 'audio/gameOver.ogg', 'audio/gameOver.m4a']);
+		this.load.audio('highScore', ['audio/highScore.mp3', 'audio/highScore.ogg', 'audio/highScore.m4a']);
+		this.load.audio('laptopOpen', ['audio/laptopOpen.mp3', 'audio/laptopOpen.ogg', 'audio/laptopOpen.m4a']);
+		this.load.audio('negativePoint', ['audio/negativePoint.mp3', 'audio/negativePoint.ogg', 'audio/negativePoint.m4a']);
+		this.load.audio('positivePoint', ['audio/positivePoint.mp3', 'audio/positivePoint.ogg', 'audio/positivePoint.m4a']);
+		this.load.audio('level01', ['audio/level01.mp3', 'audio/level01.ogg', 'audio/level01.m4a']);
+		this.load.audio('level02', ['audio/level02.mp3', 'audio/level02.ogg', 'audio/level02.m4a']);
+		this.load.audio('level03', ['audio/level03.mp3', 'audio/level03.ogg', 'audio/level03.m4a']);
+		this.load.audio('level04', ['audio/level04.mp3', 'audio/level04.ogg', 'audio/level04.m4a']);
+		this.load.audio('level05', ['audio/level05.mp3', 'audio/level05.ogg', 'audio/level05.m4a']);
+		this.load.audio('level06', ['audio/level06.mp3', 'audio/level06.ogg', 'audio/level06.m4a']);
+		this.load.audio('startScreen', ['audio/startScreen.mp3', 'audio/startScreen.ogg', 'audio/startScreen.m4a']);
 
 		/*
 		this.load.atlas('playButton', 'images/play_button.png', 'images/play_button.json');
