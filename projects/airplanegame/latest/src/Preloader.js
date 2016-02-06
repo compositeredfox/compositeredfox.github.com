@@ -183,7 +183,7 @@ BasicGame.Preloader.prototype = {
 				BasicGame.cursor.anchor.set(0.13,0.09);
 				this.stage.addChildAt(BasicGame.cursor,this.stage.children.length-1);
 
-				BasicGame.cursor.visible = false;
+				//BasicGame.cursor.visible = false;
 			}
 			
 			TransitionToState('MainMenu', this.stage);
