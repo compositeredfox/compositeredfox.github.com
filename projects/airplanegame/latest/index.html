@@ -53,10 +53,8 @@
 <script type="text/javascript">
 
 (function () {
-	var metrics = Utils.ScreenUtils.calculateScreenMetrics(1920, 1080, Utils.Orientation.LANDSCAPE);
 
-	console.log("Starting game " + metrics.gameWidth+"x"+metris.gameHeight);
-	var game = new Phaser.Game(metrics.gameWidth, metrics.gameHeight, Phaser.AUTO, 'game');
+	var game = new Phaser.Game(1280, 720, Phaser.AUTO, 'game');
 
 	game.state.add('Boot', BasicGame.Boot);
 	game.state.add('Preloader', BasicGame.Preloader);
