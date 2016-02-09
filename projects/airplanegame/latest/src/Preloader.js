@@ -34,7 +34,7 @@ BasicGame.Preloader.prototype = {
 		//this.load.setPreloadSprite(this.preloadBar);
 		*/
 
-		this.load.json('levels', '/src/levels.json');
+		this.load.json('levels', 'src/levels.json');
 
 
 		this.load.image('graphic_longbutton', 'images/graphic_longbutton.png');
