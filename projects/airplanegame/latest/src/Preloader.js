@@ -19,7 +19,9 @@ BasicGame.Preloader.prototype = {
 		this.background.width = this.game.width;
 		this.background.height = this.game.height;
 
-		this.preloadText = this.game.add.existing(Label(this, this.game.width * .5, this.game.height * .5, "Loading...", 55, "#ffffec", 'center'));
+		this.preloadText = new Phaser.Text(this.game, this.game.width * .5, this.game.height * .5, "Loading...", { font: 55 + "px Helvetica", fill: '#ffffec', 'align': 'center' });
+		this.preloadText.anchor.set(0.5,0.5);
+		this.game.add.existing(this.preloadText);
 
 		/*
 		this.preloadBar = this.add.sprite(0, 0, 'preloaderBar');
@@ -32,7 +34,8 @@ BasicGame.Preloader.prototype = {
 		//this.load.setPreloadSprite(this.preloadBar);
 		*/
 
-		
+		this.load.json('levels', '/src/levels.json');
+
 
 		this.load.image('graphic_longbutton', 'images/graphic_longbutton.png');
 		this.load.image('graphic_smallbutton', 'images/graphic_smallbutton.png');
@@ -56,6 +59,7 @@ BasicGame.Preloader.prototype = {
 		this.load.atlas('game_char2', 'images/game_char2.png', 'images/game_char2.json');
 		this.load.atlas('game_char3', 'images/game_char3.png', 'images/game_char3.json');
 		this.load.atlas('game_char4', 'images/game_char4.png', 'images/game_char4.json');
+		this.load.image('game_pupils', 'images/game_pupils.png');
 		this.load.atlas('game_cloud1', 'images/game_cloud1.png', 'images/game_cloud1.json');
 		this.load.atlas('game_cloud2', 'images/game_cloud2.png', 'images/game_cloud2.json');
 		this.load.image('game_row2_char4', 'images/game_row2_char4.png');
@@ -66,7 +70,9 @@ BasicGame.Preloader.prototype = {
 		this.load.image('game_row1_char3', 'images/game_row1_char3.png');
 		this.load.image('game_row1_char2', 'images/game_row1_char2.png');
 		this.load.image('game_row1_char1', 'images/game_row1_char1.png');
+		this.load.image('game_flash', 'images/game_flash.png');
 
+		this.load.image('game_tutorialtext', 'images/game_tutorialtext.png');
 		this.load.image('game_gratification1', 'images/game_gratification1.png');
 		this.load.image('game_gratification2', 'images/game_gratification2.png');
 		this.load.image('game_gratification3', 'images/game_gratification3.png');
@@ -159,6 +165,8 @@ BasicGame.Preloader.prototype = {
 			this.ready = true;
 
 
+			BasicGame.leveldata = this.game.cache.getJSON('levels');
+
 			// create transition
 			BasicGame.transition = new Phaser.Group(this.game);
 			BasicGame.transition.bg = new Phaser.Image(this.game,0,0,'transition_bg');
@@ -183,7 +191,7 @@ BasicGame.Preloader.prototype = {
 				BasicGame.cursor.anchor.set(0.13,0.09);
 				this.stage.addChildAt(BasicGame.cursor,this.stage.children.length-1);
 
-				//BasicGame.cursor.visible = false;
+				BasicGame.cursor.visible = false;
 			}
 			
 			TransitionToState('MainMenu', this.stage);

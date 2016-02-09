@@ -42,19 +42,18 @@ BasicGame.Game = function (game) {
     this.playing = false;
 
     this.npcs = [
-        { img: 'game_row1_char1', posLooking: {x:1171,y:283}, offsetOnIdle: {x:-1,y:68}, lookAt: 3 },
-        { img: 'game_row1_char2', posLooking: {x:1027,y:324}, offsetOnIdle: {x:-5,y:73}, lookAt: 2 },
-        { img: 'game_row1_char3', posLooking: {x:870,y:409}, offsetOnIdle: {x:-85,y:12}, lookAt: 1 },
-        { img: 'game_row1_char4', posLooking: {x:615,y:293}, offsetOnIdle: {x:-7,y:69}, lookAt: 0 },
-        { img: 'game_row2_char1', posLooking: {x:1206,y:379}, offsetOnIdle: {x:-8,y:54}, lookAt: 3 },
-        { img: 'game_row2_char2', posLooking: {x:933,y:447}, offsetOnIdle: {x:89,y:-23}, lookAt: 2 },
-        { img: 'game_row2_char3', posLooking: {x:761,y:354}, offsetOnIdle: {x:-7,y:76}, lookAt: 1 },
-        { img: 'game_row2_char4', posLooking: {x:548, y:358}, offsetOnIdle: {x:4,y:71}, lookAt: 0 }
+        { img: 'game_row1_char1', posLooking: {x:1171,y:283}, offsetOnIdle: {x:-1,y:68}, lookAt: 3, lookDelay: 0.55 },
+        { img: 'game_row1_char2', posLooking: {x:1027,y:324}, offsetOnIdle: {x:-5,y:73}, lookAt: 2, lookDelay: 0.55 },
+        { img: 'game_row1_char3', posLooking: {x:870,y:409}, offsetOnIdle: {x:-85,y:12}, lookAt: 1, lookDelay: 0.55 },
+        { img: 'game_row1_char4', posLooking: {x:615,y:293}, offsetOnIdle: {x:-7,y:69}, lookAt: 0, lookDelay: 0.55 },
+        { img: 'game_row2_char1', posLooking: {x:1206,y:379}, offsetOnIdle: {x:-8,y:54}, lookAt: 3, lookDelay: 0.25 },
+        { img: 'game_row2_char2', posLooking: {x:933,y:447}, offsetOnIdle: {x:89,y:-23}, lookAt: 2, lookDelay: 0.25 },
+        { img: 'game_row2_char3', posLooking: {x:761,y:354}, offsetOnIdle: {x:-7,y:76}, lookAt: 1, lookDelay: 0.25 },
+        { img: 'game_row2_char4', posLooking: {x:548, y:358}, offsetOnIdle: {x:4,y:71}, lookAt: 0, lookDelay: 0.25 }
     ];
-
+    /*
     // level
     this.config_defaults = {
-        total_health: 30, // max seconds laptops can been open
         laptop_min_open_delay: 2, // minimum time a laptop stays closed
         laptop_max_open_delay: 5, // maximum time a laptop stays closed
         damage_speed: 1, // laptop damage when open, in units per second
@@ -76,6 +75,7 @@ BasicGame.Game = function (game) {
         { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 },
         { laptops_goal: 20, laptop_min_open_delay: 0.2, laptop_max_open_delay: 0.4, total_health: 15, damage_speed: 0.4, max_concurrent_laptops:4 }
     ];
+    */
 
 };
 
@@ -115,6 +115,12 @@ BasicGame.Game.prototype = {
         this.gameGroup.add(new Phaser.Image(this.game, 567,415,'game_chairs2'));
 
         for(var i=4; i < 8; i++) { this.npcs[i].sprite = this.gameGroup.add(new Phaser.Image(this.game, this.npcs[i].posLooking.x + this.npcs[i].offsetOnIdle.x,this.npcs[i].posLooking.y + this.npcs[i].offsetOnIdle.y,this.npcs[i].img)); }
+
+        this.npcs[7].flashImg = this.npcs[7].sprite.addChild(new Phaser.Image(this.game, 0, 0, 'game_flash'));
+        this.npcs[7].flashImg.anchor.set(0.49,0.584577114);
+        this.npcs[7].flashImg.position.set(65,90);
+        this.npcs[7].flashImg.scale.set(0.9,0.9);
+        this.npcs[7].flashImg.visible = false;
 
         this.gameGroup.add(new Phaser.Image(this.game, 483,463,'game_chairs3'));
 
@@ -208,6 +214,8 @@ BasicGame.Game.prototype = {
         laptops[1].button.moveUp();
         laptops[2].button.moveUp();
         laptops[2].button.moveUp();
+
+        group_characters.add(new Phaser.Image(this.game, 516, 532, 'game_pupils'));
 
         // collision inside
         
@@ -363,20 +371,73 @@ BasicGame.Game.prototype = {
         this.endGameScreen.visible = false;
         //this.game.add.existing(this.endGameScreen);
 
-        // feedback
-
-        
-
-
         this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
         this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
 
         UpdateGameCursor(this.game,true);
 
-        this.startLevel(0, 900);
-
         this.game.input.keyboard.addCallbacks(this, this.onKeyDown);
 
+
+        if (BasicGame.seenTutorial == true) {
+            this.showingTutorial = false;
+            this.startLevel(0, 900);
+        } else {
+            this.playing = true;
+            this.showingTutorial = true;
+            this.laptops[0].counter = -999;
+            this.laptops[1].counter = -999;
+            this.laptops[2].counter = -999;
+            this.laptops[3].counter = -999;
+            var delay = 0.0;
+
+            // sign
+            this.time.events.add(delay += Phaser.Timer.SECOND * 1, function() {
+                this.tutorialText = new Phaser.Image(this.game,0,0,'game_tutorialtext');
+                this.tutorialText.anchor.set(0.5,0.5);
+                this.uiGroup.add(this.tutorialText);
+                this.tutorialText.position.setTo(this.game.width * .5, this.game.height * .3);
+                this.tutorialText.scale.setTo(0,0);
+                var t = this.game.add.tween(this.tutorialText.scale);
+                t.to( {x:0.6,y:0.6}, 900, Phaser.Easing.Circular.Out);
+                t.start();
+            }, this);
+            // open laptop
+            this.time.events.add(delay += Phaser.Timer.SECOND * 1.7, function() {
+                console.log('open laptop');
+                this.laptops[1].counter = 0;
+            }, this);
+            // cursor
+            this.time.events.add(delay += Phaser.Timer.SECOND * 1.0, function() {
+                console.log('cursor to close laptop');
+                this.tutorialCursor = new Phaser.Image(this.game,0,0,'game_finger');
+                this.tutorialCursor.anchor.set(0.13,0.09);
+                this.group_laptops.add(this.tutorialCursor);
+                this.tutorialCursor.position.set(this.laptops[1].button.x + 300, this.laptops[1].button.y + 500);
+                var t = this.game.add.tween(this.tutorialCursor.position);
+                t.to( {x:this.laptops[1].button.x + 100, y:this.laptops[1].button.y + 80}, 1600);
+                t.start();
+            }, this);
+            this.time.events.add(delay += Phaser.Timer.SECOND * 1.9, function(){
+                console.log('close laptop');
+                this.closeLaptop(this.laptops[1]);
+                this.laptops[1].counter = -999;
+            }, this);
+            this.time.events.add(delay += Phaser.Timer.SECOND * 1.15, function(){
+                this.tutorialCursor.destroy();
+                var t = this.game.add.tween(this.tutorialText.scale);
+                t.to( {x:0,y:0}, 400, Phaser.Easing.Circular.In);
+                t.onComplete.add(function(context,tween,sprite) {sprite.destroy(); }, this, 0, this.tutorialText);
+                t.start();
+            }, this);
+            this.time.events.add(delay += Phaser.Timer.SECOND * 1.6, function(){
+                console.log('start level');
+                this.startLevel(0,0);
+                this.showingTutorial = false;
+                BasicGame.seenTutorial = true;
+            }, this);
+
+        }
 	},
 
 	update: function () {
@@ -400,7 +461,8 @@ BasicGame.Game.prototype = {
 
             /*if (!BasicGame.orientated)
                 this.togglePause();*/
-            this.turbulence = lerp(this.turbulence, Math.random() * 6 + Math.sin(this.game.time.now * 0.005) * 5 * Math.random(), 0.09);
+            var levelturbulence = this.getLevelProperty('turbulence');
+            this.turbulence = lerp(this.turbulence, (-3 + Math.random() * 6) * levelturbulence + Math.sin(this.game.time.now * 0.005 * levelturbulence) * 5 * levelturbulence, 0.09);
 
             this.gameGroup.y += this.turbulence;
 
@@ -431,7 +493,6 @@ BasicGame.Game.prototype = {
 
                     } else {
                         open_laptops++;
-
                         this.damage += (this.game.time.elapsedMS / 1000) * this.getLevelProperty('damage_speed');
                         takingDamage = true;
                     }
@@ -449,15 +510,27 @@ BasicGame.Game.prototype = {
             };
 
             for(var i=0; i < this.npcs.length; i++) { 
-                var looking = this.laptops[this.npcs[i].lookAt].open;
-                var t = this.laptops[this.npcs[i].lookAt].counter;
+                
+                
                 //this.npcs[i].sprite.x = (looking ? this.npcs[i].offset.x : 0) * Phaser.Easing.Circular.InOut((this.game.time.elapsedMS / 1000) * 0.25);
                 //this.npcs[i].sprite.y = (looking ? this.npcs[i].offset.y : 0) * Phaser.Easing.Circular.InOut((this.game.time.elapsedMS / 1000) * 0.25);
                 
-                var npcx = this.npcs[i].posLooking.x + (looking ? 0 : this.npcs[i].offsetOnIdle.x);
-                var npcy = this.npcs[i].posLooking.y + (looking ? 0 : this.npcs[i].offsetOnIdle.y);
-                this.npcs[i].sprite.x = lerp(this.npcs[i].sprite.x, npcx, clamp01((this.game.time.elapsedMS / 1000) * 0.75));
-                this.npcs[i].sprite.y = lerp(this.npcs[i].sprite.y, npcy, clamp01((this.game.time.elapsedMS / 1000) * 0.75));
+                var looking = this.laptops[this.npcs[i].lookAt].open && this.laptops[this.npcs[i].lookAt].counter >= this.npcs[i].lookDelay;
+                var targetPos = { 
+                    x: this.npcs[i].posLooking.x + (looking ? 0 : this.npcs[i].offsetOnIdle.x),
+                    y: this.npcs[i].posLooking.y + (looking ? 0 : this.npcs[i].offsetOnIdle.y)
+                };
+                var l = clamp01((this.game.time.elapsedMS / 1000) * 7);
+                this.npcs[i].sprite.x = lerp(this.npcs[i].sprite.x, targetPos.x, l);
+                this.npcs[i].sprite.y = lerp(this.npcs[i].sprite.y, targetPos.y, l);
+
+                // flash
+                if (i == 7) {
+                    var flashframes = [1,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0];
+                    var flash = looking && (flashframes[Math.floor((this.game.time.time * 0.0003 % 0.99) * flashframes.length)] == 1);
+                    if (flash && !this.npcs[7].flashImg.visible) this.npcs[7].flashImg.angle = Math.random() * 360;
+                    this.npcs[7].flashImg.visible = flash;
+                }
                 
             }
 
@@ -480,27 +553,29 @@ BasicGame.Game.prototype = {
 
             this.progressText.text = (this.currentLevelNumber < 9 ? "0" : "") + (this.currentLevelNumber+1).toString();
             
-            if(this.damage > this.health) {
-                // lose
-                this.playing = false;
-                this.onEndGame();
-                /*var t = this.tweenLevelText("GAME OVER", 3000); //TODO: localize
-                t.onComplete.add(function(target,tween){
+            if (this.showingTutorial != true) {
+                if(this.damage > this.health) {
+                    // lose
+                    this.playing = false;
                     this.onEndGame();
-                },this);
-                t.start();*/
-            }
-            if(this.laptopsPressed >= this.getLevelProperty('laptops_goal')) {
-                // win
-                this.playing = false;
-                if (this.currentLevelNumber < this.config_levels.length -1)
-                    this.startLevel(this.currentLevelNumber+1, 0);
-                else
-                    this.onEndGame();
-                /*var t = this.tweenLevelText("LEVEL COMPLETE", 3000); //TODO: localize
-                t.onComplete.add(function(target,tween){
-                },this);
-                t.start();*/
+                    /*var t = this.tweenLevelText("GAME OVER", 3000); //TODO: localize
+                    t.onComplete.add(function(target,tween){
+                        this.onEndGame();
+                    },this);
+                    t.start();*/
+                }
+                if(this.laptopsPressed >= this.getLevelProperty('laptops_goal')) {
+                    // win
+                    this.playing = false;
+                    if (this.currentLevelNumber < BasicGame.leveldata.levels.length -1)
+                        this.startLevel(this.currentLevelNumber+1, 0);
+                    else
+                        this.onEndGame();
+                    /*var t = this.tweenLevelText("LEVEL COMPLETE", 3000); //TODO: localize
+                    t.onComplete.add(function(target,tween){
+                    },this);
+                    t.start();*/
+                }
             }
         }
         
@@ -525,10 +600,11 @@ BasicGame.Game.prototype = {
 
     onHitGameArea: function(button) {
         this.sound.play('negativePoint');
-        console.log('onHitGameArea');
+        //console.log('onHitGameArea');
     },
 
     onHitLaptop: function(button, game, laptopObject) {
+        if (this.showingTutorial) return;
         //console.log("hit laptop " + laptopObject);
         if (laptopObject.open) {
             this.closeLaptop(laptopObject);
@@ -597,6 +673,7 @@ BasicGame.Game.prototype = {
     },
 
     togglePause: function(pointer) {
+        if (this.showingTutorial == true) return;
 
         this.pauseScreen.visible = !this.pauseScreen.visible;
         if (this.pauseScreen.visible) {
@@ -654,6 +731,11 @@ BasicGame.Game.prototype = {
         // counters
         //this.damage = 0;
         this.laptopsPressed = 0;
+        if (levelnumber == 0) {
+            this.score = 0;
+            this.laptopsPressed = 0;
+            this.health = 100;
+        }
         //this.health = this.getLevelProperty('total_health');
         //state
         for (var i = 0; i < this.laptops.length; i++) {
@@ -662,9 +744,7 @@ BasicGame.Game.prototype = {
         };
 
         console.log("Starting level #" + this.currentLevelNumber + " with properties: \n" +
-            "laptop_min_open_delay: "+this.getLevelProperty('laptop_min_open_delay') + "\n" + 
-            "laptop_max_open_delay: "+this.getLevelProperty('laptop_max_open_delay') + "\n" + 
-            "total_health: "+this.getLevelProperty('total_health') + "\n" + 
+            "laptop_opentime: "+this.getLevelProperty('laptop_opentime') + "\n" + 
             "damage_speed: "+this.getLevelProperty('damage_speed') + "\n" + 
             "max_concurrent_laptops: "+this.getLevelProperty('max_concurrent_laptops') + "\n" + 
             "laptops_goal: "+this.getLevelProperty('laptops_goal')
@@ -695,6 +775,7 @@ BasicGame.Game.prototype = {
             this.music.position = pos;
             this.music.onDecoded.add(function(sound){ sound.volume = 0; sound.game.add.tween(sound).to({volume:1}, 500).start()});
         }
+        this.showingTutorial = false;
 
     },
 	
@@ -712,8 +793,11 @@ BasicGame.Game.prototype = {
                 score = 100;
         }
 
-        this.score += score;
-        this.showScore(score);
+        
+        if (this.showingTutorial != true) {
+            this.score += score;
+            this.showScore(score);
+        }
 
         this.resetLaptopCounter(laptopObject);
         laptopObject.particles_secrets.on = false;
@@ -733,13 +817,13 @@ BasicGame.Game.prototype = {
     },
 
     resetLaptopCounter: function(laptopObject) { 
-        laptopObject.counter = 0 - (this.getLevelProperty('laptop_min_open_delay') + Math.random() * this.getLevelProperty('laptop_max_open_delay')); 
+        laptopObject.counter = 0 - (this.getLevelProperty('laptop_opentime')[0] + Math.random() * this.getLevelProperty('laptop_opentime')[1]); 
     },
 
     getLevelProperty: function(property) {
         var v = null;
-        if (this.config_levels[this.currentLevelNumber] != null) v = this.config_levels[this.currentLevelNumber][property];
-        if (v == null) v = this.config_defaults[property];
+        if (BasicGame.leveldata.levels[this.currentLevelNumber] != null) v = BasicGame.leveldata.levels[this.currentLevelNumber][property];
+        if (v == null) v = BasicGame.leveldata.defaults[property];
         if (v == null) console.log("Error getting level property " + property);
         return v;
     },
@@ -770,15 +854,18 @@ BasicGame.Game.prototype = {
         return tweenIn;
 
     },
-    tweenGratification: function() {
-        var sprites = ['game_gratification1', 'game_gratification2','game_gratification3','game_gratification4','game_gratification5'];
-        var s = this.uiGroup.add(new Phaser.Image(this.game,0,0,sprites[Math.round(Math.random() * (sprites.length -1))]));
+    tweenGratification: function(sprite, duration) {
+        if (sprite == null) {
+            var sprites = ['game_gratification1', 'game_gratification2','game_gratification3','game_gratification4','game_gratification5'];
+            sprite = sprites[Math.round(Math.random() * (sprites.length -1))];
+        }
+        var s = this.uiGroup.add(new Phaser.Image(this.game,0,0,sprite));
         s.anchor.set(0.5,0.5);
         s.x = this.game.width * .5;
         s.y = this.game.height * .38;
         s.scale.set(0.6,0.6);
 
-        var duration = 1200;
+        if (duration == null) duration = 1200;
 
         var tweenIn = this.game.add.tween(s.scale);
         tweenIn.to( { x:.7,y:.7 }, duration * 0.6, Phaser.Easing.Elastic.Out);
@@ -834,7 +921,6 @@ BasicGame.Game.prototype = {
     },
 
     onKeyDown: function(event) {
-        console.log('key down ' + event.keyCode);
         var k = event.keyCode;
         if (k == Phaser.KeyCode.ESC) {
             this.togglePause();
@@ -851,13 +937,18 @@ BasicGame.Game.prototype = {
             }
             if (k == Phaser.KeyCode.I) {
                 this.playing = false;
-                if (this.currentLevelNumber < this.config_levels.length -1)
-                    this.startLevel(this.currentLevelNumber+1, 0);
-                else
-                    this.onEndGame();
-            }
-            if (k == Phaser.KeyCode.U) {
-                this.tweenGratification();
+                if (this.showingTutorial == true) {
+                    this.showingTutorial = false;
+                    this.time.events.removeAll();
+                    if (this.tutorialText != null) this.tutorialText.destroy();
+                    if (this.tutorialCursor != null) this.tutorialCursor.destroy();
+                    this.startLevel(0,0);
+                } else {
+                    if (this.currentLevelNumber < BasicGame.leveldata.levels.length -1)
+                        this.startLevel(this.currentLevelNumber+1, 0);
+                    else
+                        this.onEndGame();
+                }
             }
         }
     }

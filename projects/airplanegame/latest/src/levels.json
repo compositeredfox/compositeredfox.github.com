@@ -1,0 +1,26 @@
+{
+	"_HOW_TO_USE": "See levels_readme.txt",
+	
+	"cheats_enabled": true,
+
+    "defaults": {
+        "laptop_opentime": [2,5],
+        "damage_speed": 1,
+        "max_concurrent_laptops": 4,
+        "laptops_goal": 10,
+        "laptop_specialcontentchance": 0.25,
+        "turbulence": 1
+    },
+    "levels": [
+        { "laptops_goal": 5, "laptop_opentime": [2,5], "damage_speed": 0.5, "max_concurrent_laptops":1 },
+		{ "laptops_goal": 10, "laptop_opentime": [1,2], "damage_speed": 0.6, "max_concurrent_laptops":2, "turbulence": 1.5 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.2,0.4], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 4 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.2,0.4], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 8 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.2,0.4], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 8 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.2,0.4], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 8 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.2,0.4], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 8 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.2,0.4], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 8 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.2,0.4], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 8 },
+		{ "laptops_goal": 20, "laptop_opentime": [0.1,0.2], "damage_speed": 0.4, "max_concurrent_laptops":4, "turbulence": 12, "laptop_specialcontentchance": 1 }
+    ]
+}

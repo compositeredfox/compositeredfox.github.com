@@ -5,10 +5,14 @@ BasicGame = {
     /* If the music in your game needs to play through-out a few State swaps, then you could reference it here */
     music: null,
 
+    // levels JSON
+    leveldata: null,
+
     /* Your game can check BasicGame.orientated in internal loops to know if it should pause or not */
     orientated: false,
 
     openLeaderboards: false,
+    seenTutorial: false,
 
     cheatCodes: true
 

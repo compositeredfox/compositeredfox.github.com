@@ -29,12 +29,13 @@ BasicGame.MainMenu.prototype = {
 		this.sprite_airplane = this.add.image(this.game.width * .19, this.game.height * .6, 'mainmenu_plane');
 		this.sprite_airplane.anchor.set(0.5,0.5);
 
-		//this.sprite_title = this.add.image(this.game.width * .5, this.game.height * .3, 'mainmenu_title').anchor.set(0.5,0.5);
-
+		this.img_title = this.add.image(this.game.width * .5, this.game.height * .3, 'mainmenu_title');
+		this.img_title.anchor.set(0.5,0.5);
+		/*
         var title = Label(this, this.game.width * .5, this.game.height * .4, "DON'T PLAY THIS\nGAME AT WORK", 88, "#ffffff", 'center'); //TODO: localize
         title.setShadow(0,0,'rgba(0,0,0,0.12)',10);
         this.game.add.existing(title);
-
+		*/
         this.button_start = this.game.add.existing(ButtonWithTextOver(this, this.game.width * .5, this.game.height * 0.65, "START", 'button_title', 'button_title_over', 12, "#000000", this.startGame)); //TODO: localize
         //this.button_hiscores = this.game.add.existing(ButtonWithText(this, this.game.width - 90, this.game.height - 30, "- High Scores -", 'graphic_smallbutton', 24, "#ffffff", this.openLeaderboards)); //TODO: localize
         //this.button_hiscores.alpha = 0.7;
@@ -122,6 +123,11 @@ BasicGame.MainMenu.prototype = {
 	},
 
 	update: function () {
+
+		this.img_title.x = this.game.width * .5;
+		this.img_title.y = this.game.height * .33;
+		var s = 0.9 + Math.sin(this.game.time.time * 0.001 + 0.2) * 0.01;
+		this.img_title.scale.setTo(s,s);
 
 		this.sprite_airplane.y = this.game.height * .75 + Math.sin(this.game.time.time * 0.0015) * 10;
 
