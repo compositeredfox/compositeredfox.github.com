@@ -26,19 +26,18 @@ BasicGame.Boot.prototype = {
     init: function () {
 
         this.input.maxPointers = 1;
-        this.stage.disableVisibilityChange = true;
 
         if (this.game.device.desktop)
         {
             this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            this.scale.setMinMax(640, 360, 1280, 720);
+            this.scale.setMinMax(480, 270, 1920, 1080);
             this.scale.pageAlignHorizontally = true;
             this.scale.pageAlignVertically = true;
         }
         else
         {
             this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            this.scale.setMinMax(640, 360, 1280, 720);
+            this.scale.setMinMax(480, 270, 1920, 1080);
             this.scale.pageAlignHorizontally = true;
             this.scale.pageAlignVertically = true;
             this.scale.forceOrientation(true, false);

@@ -19,8 +19,7 @@ BasicGame.Preloader.prototype = {
 		this.background.width = this.game.width;
 		this.background.height = this.game.height;
 
-		this.preloadText = new Phaser.Text(this.game, this.game.width * .5, this.game.height * .5, "Loading...", { font: 55 + "px Helvetica", fill: '#ffffec', 'align': 'center' });
-		this.preloadText.anchor.set(0.5,0.5);
+		this.preloadText = new Phaser.Text(this.game, this.game.width * .5 - 100, this.game.height * .5, "Loading...", { font: 55 + "px Helvetica", fill: '#ffffec', 'align': 'left' });
 		this.game.add.existing(this.preloadText);
 
 		/*
@@ -40,6 +39,10 @@ BasicGame.Preloader.prototype = {
 		this.load.image('graphic_longbutton', 'images/graphic_longbutton.png');
 		this.load.image('graphic_smallbutton', 'images/graphic_smallbutton.png');
 		this.load.atlas('buttons', 'images/buttons.png', 'images/buttons.json');
+		this.load.atlas('button_pause_group', 'images/button_pause_group.png', 'images/button_pause_group.json');
+
+		this.load.image('loading', 'images/loading.png');
+		this.load.atlas('wipe', 'images/wipe.png', 'images/wipe.json');
 
 		this.load.image('transition_bg', 'images/transition_bg.png');
 		this.load.image('popupbg_corner', 'images/popupbg_corner.png');
@@ -73,6 +76,8 @@ BasicGame.Preloader.prototype = {
 		this.load.image('game_flash', 'images/game_flash.png');
 
 		this.load.image('game_tutorialtext', 'images/game_tutorialtext.png');
+		this.load.image('game_wintext', 'images/game_wintext.png');
+		this.load.image('game_losetext', 'images/game_losetext.png');
 		this.load.image('game_gratification1', 'images/game_gratification1.png');
 		this.load.image('game_gratification2', 'images/game_gratification2.png');
 		this.load.image('game_gratification3', 'images/game_gratification3.png');
@@ -97,15 +102,15 @@ BasicGame.Preloader.prototype = {
 		this.load.image('game_level', 'images/game_level.png');
 		this.load.atlas('game_levelnumber', 'images/game_levelnumber.png', 'images/game_levelnumber.json');
 		this.load.image('game_finger', 'images/game_finger.png');
+		this.load.image('pause_bg', 'images/pause_bg.jpg');
 
 		this.load.image('game_end_footer', 'images/game_end_footer.png');
 		this.load.image('game_end_middle', 'images/game_end_middle.png');
 		this.load.image('game_end_top_hiscore', 'images/game_end_top_hiscore.png');
 		this.load.image('game_end_top_gameover', 'images/game_end_top_gameover.png');
 
-		this.load.image('leaderboards_close', 'images/leaderboards_close.png');
+		this.load.image('leaderboards_bg', 'images/leaderboards_bg.png');
 		this.load.image('leaderboards_separator', 'images/leaderboards_separator.png');
-		this.load.image('leaderboards_top', 'images/leaderboards_top.png');
 
 		this.load.audio('gameLevel', ['audio/gameLevel.mp3', 'audio/gameLevel.ogg', 'audio/gameLevel.m4a']);
 		this.load.audio('gameOver', ['audio/gameOver.mp3', 'audio/gameOver.ogg', 'audio/gameOver.m4a']);
@@ -126,7 +131,7 @@ BasicGame.Preloader.prototype = {
 		this.load.audio('titleMusic', ['audio/main_menu.mp3']);
 		this.load.bitmapFont('caslon', 'fonts/caslon.png', 'fonts/caslon.xml');
 		*/
-		
+		//this.update();
 
 	},
 
@@ -150,30 +155,55 @@ BasicGame.Preloader.prototype = {
 		
 		//	If you don't have any music in your game then put the game.state.start line into the create function and delete
 		//	the update function completely.
-		/*
-		if (this.cache.isSoundDecoded('titleMusic') && this.ready == false)
-		{
-			this.ready = true;
-			this.state.start('MainMenu');
-		}
-		*/
 
-		this.preloadText.scale.x = this.preloadText.scale.y = 1 + Math.sin(this.game.time.time * 0.003) * 0.08;
+		var s = "Loading.";
+		var t = this.game.time.time * 0.0007;
+		if (t % 1 > 0.33) s += "."
+		if (t % 1 > 0.66) s += "."
+		this.preloadText.text = s;
 
-		if(this.ready == false)
+		if(this.cache.isSoundDecoded('startScreen') && this.ready == false)
 		{
 			this.ready = true;
 
 
 			BasicGame.leveldata = this.game.cache.getJSON('levels');
+			BasicGame.cheatCodes = BasicGame.leveldata.cheats_enabled;
 
 			// create transition
 			BasicGame.transition = new Phaser.Group(this.game);
-			BasicGame.transition.bg = new Phaser.Image(this.game,0,0,'transition_bg');
-			//BasicGame.transition.bg.width = this.game.width;
-			//BasicGame.transition.bg.height = this.game.height;
+			BasicGame.transition.bg = new Phaser.Sprite(this.game,0,0,'wipe');
+
+			BasicGame.transition.bg.animations.add('in', [
+				"wipe0000",
+				"wipe0001",
+				"wipe0002",
+				"wipe0003",
+				"wipe0004",
+				"wipe0005",
+				"wipe0006",
+				"wipe0007",
+				"wipe0008",
+				"wipe0009",
+				"wipe0010",
+				"wipe0011",
+				"wipe0012",
+				"wipe0013",
+			], 25);
+			BasicGame.transition.bg.animations.add('out', [
+				"wipe0014",
+				"wipe0015",
+				"wipe0016",
+				"wipe0017",
+				"wipe0018",
+				"wipe0019",
+				"wipe0020"
+			], 25);
+			//BasicGame.transition.bg.scale.set(2.05,2.05)
+			BasicGame.transition.bg.width = this.game.width;
+			BasicGame.transition.bg.height = this.game.height;
 			//BasicGame.transition.bg.anchor.set(0.5,0.5);
-			BasicGame.transition.bg.anchor.set(0,0);
+			//BasicGame.transition.bg.anchor.set(0,0);
 			BasicGame.transition.bg.position.set(0,0);
 			BasicGame.transition.add(BasicGame.transition.bg);
 			/*

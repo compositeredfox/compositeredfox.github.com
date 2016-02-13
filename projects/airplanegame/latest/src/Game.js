@@ -1,3 +1,26 @@
+var fakeScores = {
+   "1": {
+      "id": "1000",
+      "name": "Able",
+      "points": "3213"
+   },
+   "3": {
+      "id": "1000",
+      "name": "Christie",
+      "points": "1500"
+   },
+   "2": {
+      "id": "1000",
+      "name": "Betty",
+      "points": "2001"
+   },
+   "4": {
+      "id": "1000",
+      "name": "Darius",
+      "points": "500"
+   },
+};
+
 
 BasicGame.Game = function (game) {
 
@@ -95,6 +118,7 @@ BasicGame.Game.prototype = {
 
         this.gameGroup = this.game.add.group();
         this.uiGroup = this.game.add.group();
+        this.uiGroup.fixedToCamera = true;
 
         var sky = this.gameGroup.add(new Phaser.Image(this.game,0,0,'game_sky'));
         sky.width = 1920;
@@ -241,28 +265,30 @@ BasicGame.Game.prototype = {
         this.levelDetails.add(levelDetailsBg);
 
         var style = { font: "40px Pebble", fill: "#000000", align: "right" };
-        this.scoreText = new Phaser.Text(this.game, 354, -10, "0000", style);
+        this.scoreText = new Phaser.Text(this.game, 384, -10, "00000", style);
         this.scoreText.anchor.set(1,1);
         this.levelDetails.add(this.scoreText);
 
-        style = { font: "40px Pebble", fill: "#000000", align: "right" };
-        this.progressText = new Phaser.Text(this.game, -277, -10, "01", style);
-        this.progressText.anchor.set(1,1);
+        style = { font: "14px Helvetica", fill: "#000000", align: "left" };
+        this.progressText = new Phaser.Text(this.game, 208, -16, "01 / 10", style);
+        this.progressText.anchor.set(0,1);
         this.levelDetails.add(this.progressText);
 
         this.damageBarBg = UpdateProgressBar(this.game, 1, 0xf2f2f2, null);
         this.damageBar = UpdateProgressBar(this.game, 1, 0x32ff00, null);
 
-        this.damageBarBg.group.position.set(-225,-50);
-        this.damageBar.group.position.set(-225,-50);
+        this.damageBarBg.group.position.set(-270,-50);
+        this.damageBar.group.position.set(-270,-50);
         this.levelDetails.add(this.damageBarBg.group); //bg
         this.levelDetails.add(this.damageBar.group);
             
         // pause button
 
-        this.pauseButton = this.uiGroup.add(ButtonWithText(this,0,0, "- PAUSE -", 'graphic_smallbutton', 20, 0x000000, this.togglePause));
-        this.pauseButton.scale.set(0.8,0.8);
-        this.pauseButton.alpha = 0.8;
+        //this.pauseButton = this.uiGroup.add(ButtonWithText(this,0,0, "- PAUSE -", 'graphic_smallbutton', 20, 0x000000, this.togglePause));
+        //this.pauseButton.scale.set(0.8,0.8);
+        //this.pauseButton.alpha = 0.8;
+        this.pauseButton = this.uiGroup.add(new Phaser.Button(this.game,0,0,'button_pause_group',this.togglePause,this,'button_pause_over','button_pause','button_pause_over','button_pause'));
+        this.pauseButton.anchor.set(0.5,0.5);
         this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
         this.pauseButton.y = this.pauseButton.height*.5 + 10;
 
@@ -291,12 +317,15 @@ BasicGame.Game.prototype = {
         this.pauseScreen.popup.x = this.game.width * .5;
         this.pauseScreen.popup.y = this.game.height * .5;
 
-        this.pauseScreen.popup.add(MenuBackground(this.game, 0, 0, 500, 350));
+        //this.pauseScreen.popup.add(MenuBackground(this.game, 0, 0, 500, 350));
+        var pausebg = new Phaser.Image(this.game,0,0,'pause_bg');
+        pausebg.anchor.set(0.5,0.5);
+        this.pauseScreen.popup.add(pausebg);
 
-        var l = Label(this,0, - 80, "PAUSED", 85, "#ffffcc", 'center');
+        var l = Label(this,0, - 167, "PAUSED", 100, "#990AE3", 'center');
         this.pauseScreen.popup.add(l);
-        this.pauseScreen.popup.add(ButtonWithText(this,0, 30, "- Continue -", 'graphic_smallbutton', 18, "#ffffff", this.togglePause));
-        this.pauseScreen.popup.add(ButtonWithText(this,0, 100, "- Quit -", 'graphic_smallbutton', 18, "#ffffff", this.quitGame));
+        this.pauseScreen.popup.add(ButtonWithTextOver(this,0, 30, "CONTINUE", 'button_endgame1_over', 'button_endgame1', 12, "#990AE3", this.togglePause));
+        this.pauseScreen.popup.add(ButtonWithTextOver(this,0, 100, "QUIT", 'button_endgame1_over', 'button_endgame1', 12, "#990AE3", this.quitGame));
 
         this.pauseScreen.visible = false;
 
@@ -320,16 +349,23 @@ BasicGame.Game.prototype = {
         this.endGameScreen.popup = this.endGameScreen.add(new Phaser.Group(this.game));
         //this.endGameScreen.popup.add(MenuBackground(this.game, 0, 0, 800, 660));
         
-        this.endGameScreen.bg_middle = this.endGameScreen.popup.add(new Phaser.Image(this.game,0,0,'game_end_middle'));
-        this.endGameScreen.bg_middle.anchor.set(0.5,1);
+        this.endGameScreen.middle = this.endGameScreen.popup.add(new Phaser.Image(this.game,0,0,'game_end_middle'));
+        this.endGameScreen.middle.anchor.set(0.5,1);
 
-        this.endGameScreen.bg_gameover = new Phaser.Image(this.game,0,-this.endGameScreen.bg_middle.height,'game_end_top_gameover');
-        this.endGameScreen.bg_gameover.anchor.set(0.5,1);
-        this.endGameScreen.popup.add(this.endGameScreen.bg_gameover);
+        this.endGameScreen.gameover_top = new Phaser.Image(this.game,0,-this.endGameScreen.middle.height,'game_end_top_gameover');
+        this.endGameScreen.gameover_top.anchor.set(0.5,1);
+        this.endGameScreen.popup.add(this.endGameScreen.gameover_top);
 
-        this.endGameScreen.bg_hiscore = new Phaser.Image(this.game,0,-this.endGameScreen.bg_middle.height,'game_end_top_hiscore');
-        this.endGameScreen.bg_hiscore.anchor.set(0.5,1);
-        this.endGameScreen.popup.add(this.endGameScreen.bg_hiscore);
+        this.endGameScreen.hiscore_top = new Phaser.Image(this.game,0,-this.endGameScreen.middle.height,'game_end_top_hiscore');
+        this.endGameScreen.hiscore_top.anchor.set(0.5,1);
+        this.endGameScreen.popup.add(this.endGameScreen.hiscore_top);
+
+        this.endGameScreen.gameover_title = this.endGameScreen.popup.add(Label(this,-365,-498, "GAME OVER", 60, "#990AE3", 'left'));
+        this.endGameScreen.gameover_title.anchor.set(0,0);
+
+        this.endGameScreen.hiscore_title = this.endGameScreen.popup.add(Label(this,-365,-498, "NEW\nHIGH SCORE!", 60, "#990AE3", 'left'));
+        this.endGameScreen.hiscore_title.lineSpacing = -15;
+        this.endGameScreen.hiscore_title.anchor.set(0,0);
 
         /*
         this.endGameScreen.input = new Phaser.Text(this.game, 120, -105, "| YOUR NAME?   ", { font: "42px Arial", fill: "#ffffff", align: "right" });
@@ -337,8 +373,11 @@ BasicGame.Game.prototype = {
         this.endGameScreen.popup.add(this.endGameScreen.input);
         */
 
-        this.endGameScreen.hiscore = this.endGameScreen.popup.add(Label(this, 350, -378 + 20, "", 40, "#000000", 'right'));
-        this.endGameScreen.hiscore.anchor.set(1,1);
+        this.endGameScreen.gameover_subtitle = this.endGameScreen.popup.add(Label(this,-365,-378 + 20, "YOUR SCORE", 40, "#000000", 'left'));
+        this.endGameScreen.gameover_subtitle.anchor.set(0,1);
+        this.endGameScreen.gameover_hiscore = this.endGameScreen.popup.add(Label(this, 350, -378 + 20, "13243", 40, "#000000", 'right'));
+        this.endGameScreen.gameover_hiscore.anchor.set(1,1);
+        this.endGameScreen.gameover_hiscorep = this.endGameScreen.popup.add(new Phaser.Text(this.game, 355, -384, "p", { font: "14px Helvetica", fill: "#000000", align: "left"}));
         
         this.endGameScreen.hiscoretable = this.endGameScreen.popup.add(new Phaser.Group(this.game));
         this.endGameScreen.hiscorelines = [];
@@ -349,17 +388,25 @@ BasicGame.Game.prototype = {
             this.endGameScreen.hiscorelines[i].num.anchor.set(1,1);
             this.endGameScreen.hiscorelines[i].name = new Phaser.Text(this.game, -292, y, "", { font: "40px Pebble", fill: "#000000", align: "left"});
             this.endGameScreen.hiscorelines[i].name.anchor.set(0,1);
-            this.endGameScreen.hiscorelines[i].points = new Phaser.Text(this.game, 351, y, "", { font: "40px Pebble", fill: "#000000", align: "left"});
+            this.endGameScreen.hiscorelines[i].points = new Phaser.Text(this.game, 351, y, "", { font: "40px Pebble", fill: "#000000", align: "right"});
             this.endGameScreen.hiscorelines[i].points.anchor.set(1,1);
+            this.endGameScreen.hiscorelines[i].p = new Phaser.Text(this.game, 354, y, "p", { font: "16px Helvetica", fill: "#000000", align: "left"});
+            this.endGameScreen.hiscorelines[i].p.anchor.set(0,1);
+
             this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].num);
             this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].name);
             this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].points);
+            this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].p);
 
         };
         this.endGameScreen.button_hiscore = ButtonWithTextOver(this,-230, -66, "SEE HIGH SCORE BOARD", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.gotoHiscores);
         this.endGameScreen.popup.add(this.endGameScreen.button_hiscore);
         this.endGameScreen.button_restart = ButtonWithTextOver(this,230, -66, "PLAY AGAIN", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.restartGame);
         this.endGameScreen.popup.add(this.endGameScreen.button_restart);
+
+        this.endGameScreen.loading = this.endGameScreen.popup.add(new Phaser.Image(this.game,0,-210, 'loading'));
+        this.endGameScreen.loading.anchor.set(0.5,0.5);
+        this.endGameScreen.loading.scale.set(0.4,0.4);
         
         this.endGameScreen.footer = this.endGameScreen.add(new Phaser.Group(this.game));
         this.endGameScreen.footer.bg = new Phaser.Image(this.game,0,0,'game_end_footer');
@@ -371,12 +418,26 @@ BasicGame.Game.prototype = {
         this.endGameScreen.visible = false;
         //this.game.add.existing(this.endGameScreen);
 
-        this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
-        this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
+        this.game.world.setBounds(-1920 * 2,-1080,1920*4,1080*2);
+        this.camera.x = 300;
+        this.camera.y = 300 - 55;
 
         UpdateGameCursor(this.game,true);
 
         this.game.input.keyboard.addCallbacks(this, this.onKeyDown);
+
+        //document.getElementById("pause_continue").onclick = this.togglePause;
+        //document.getElementById("pause_quit").onclick = this.quitGame;
+
+        
+        if (BasicGame.cheatCodes == true) {
+            var b = this.uiGroup.add(ButtonWithText(this, 340, 30, "WIN WITH HI SCORE", 'graphic_smallbutton', 18, "#000000", function(){this.score=99999;this.onEndGame(true);}));
+            b.scale.setTo(0.7,0.7);
+            b = this.uiGroup.add(ButtonWithText(this, 550, 30, "WIN WITHOUT HI SCORE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(true);}));
+            b.scale.setTo(0.7,0.7);
+            b = this.uiGroup.add(ButtonWithText(this, 760, 30, "LOSE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(false);}));
+            b.scale.setTo(0.7,0.7);
+        }
 
 
         if (BasicGame.seenTutorial == true) {
@@ -399,21 +460,22 @@ BasicGame.Game.prototype = {
                 this.tutorialText.position.setTo(this.game.width * .5, this.game.height * .3);
                 this.tutorialText.scale.setTo(0,0);
                 var t = this.game.add.tween(this.tutorialText.scale);
-                t.to( {x:0.6,y:0.6}, 900, Phaser.Easing.Circular.Out);
+                t.to( {x:1.25,y:1.25}, 1400, Phaser.Easing.Cubic.Out);
                 t.start();
             }, this);
             // open laptop
-            this.time.events.add(delay += Phaser.Timer.SECOND * 1.7, function() {
+            this.time.events.add(delay += Phaser.Timer.SECOND * 2.4, function() {
                 console.log('open laptop');
                 this.laptops[1].counter = 0;
+                
             }, this);
             // cursor
-            this.time.events.add(delay += Phaser.Timer.SECOND * 1.0, function() {
+            this.time.events.add(delay += Phaser.Timer.SECOND * 0.0, function() {
                 console.log('cursor to close laptop');
                 this.tutorialCursor = new Phaser.Image(this.game,0,0,'game_finger');
                 this.tutorialCursor.anchor.set(0.13,0.09);
                 this.group_laptops.add(this.tutorialCursor);
-                this.tutorialCursor.position.set(this.laptops[1].button.x + 300, this.laptops[1].button.y + 500);
+                this.tutorialCursor.position.set(this.laptops[1].button.x + 200, this.laptops[1].button.y + 300);
                 var t = this.game.add.tween(this.tutorialCursor.position);
                 t.to( {x:this.laptops[1].button.x + 100, y:this.laptops[1].button.y + 80}, 1600);
                 t.start();
@@ -443,17 +505,16 @@ BasicGame.Game.prototype = {
 	update: function () {
         if (this.pauseScreen == null)
             return;
+
         
-        this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
-        this.pauseButton.y = this.pauseButton.height*.5 + 10;
-
-        this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
-        this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5 - 55;
-
-
-
+        
         if (this.pauseScreen.visible || this.endGameScreen.visible || !this.playing) {
             // paused
+
+
+            if (this.endGameScreen.loading.visible) {
+                this.endGameScreen.loading.angle = -this.game.time.time * 0.2;
+            }
 
         } else {
             
@@ -463,8 +524,9 @@ BasicGame.Game.prototype = {
                 this.togglePause();*/
             var levelturbulence = this.getLevelProperty('turbulence');
             this.turbulence = lerp(this.turbulence, (-3 + Math.random() * 6) * levelturbulence + Math.sin(this.game.time.now * 0.005 * levelturbulence) * 5 * levelturbulence, 0.09);
-
-            this.gameGroup.y += this.turbulence;
+            this.turbulence = clamp(this.turbulence, -4, 15);
+            //this.gameGroup.y += this.turbulence;
+            this.camera.y = 300 - 55 + this.turbulence;
 
             var takingDamage = false;
 
@@ -498,7 +560,9 @@ BasicGame.Game.prototype = {
                     }
                 }
                 this.laptops[i].openRatio = towards(this.laptops[i].openRatio, this.laptops[i].open ? 1.0 : 0.0, 4.0, this.game.time.elapsedMS / 1000);
-                this.laptops[i].button.frame = Math.floor(this.laptops[i].openRatio * 5);
+                var frame = Math.floor(this.laptops[i].openRatio * 5);
+                if (this.laptops[i].button.frame != frame)
+                    this.laptops[i].button.frame = frame;
 
                 var emitter = this.laptops[i].particles_secrets_special.on ? this.laptops[i].particles_secrets_special : this.laptops[i].particles_secrets;
                 if (emitter.on) {
@@ -527,7 +591,7 @@ BasicGame.Game.prototype = {
                 // flash
                 if (i == 7) {
                     var flashframes = [1,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0];
-                    var flash = looking && (flashframes[Math.floor((this.game.time.time * 0.0003 % 0.99) * flashframes.length)] == 1);
+                    var flash = looking && this.laptops[this.npcs[i].lookAt].counter > 1.75 && (flashframes[Math.floor((this.game.time.time * 0.0003 % 0.99) * flashframes.length)] == 1);
                     if (flash && !this.npcs[7].flashImg.visible) this.npcs[7].flashImg.angle = Math.random() * 360;
                     this.npcs[7].flashImg.visible = flash;
                 }
@@ -548,16 +612,20 @@ BasicGame.Game.prototype = {
             if (this.score < 10) t += "0";
             if (this.score < 100) t += "0";
             if (this.score < 1000) t += "0";
+            if (this.score < 10000) t += "0";
             t += Math.floor(this.score).toString();
-            this.scoreText.text = t;
+            if (this.scoreText.text != t)
+                this.scoreText.text = t;
 
-            this.progressText.text = (this.currentLevelNumber < 9 ? "0" : "") + (this.currentLevelNumber+1).toString();
+            var progresstext = (this.currentLevelNumber < 9 ? "0" : "") + (this.currentLevelNumber+1).toString() + " / 10";
+            if (this.progressText.text != progresstext)
+                this.progressText.text = progresstext;
             
             if (this.showingTutorial != true) {
                 if(this.damage > this.health) {
                     // lose
                     this.playing = false;
-                    this.onEndGame();
+                    this.onEndGame(false);
                     /*var t = this.tweenLevelText("GAME OVER", 3000); //TODO: localize
                     t.onComplete.add(function(target,tween){
                         this.onEndGame();
@@ -570,7 +638,7 @@ BasicGame.Game.prototype = {
                     if (this.currentLevelNumber < BasicGame.leveldata.levels.length -1)
                         this.startLevel(this.currentLevelNumber+1, 0);
                     else
-                        this.onEndGame();
+                        this.onEndGame(true);
                     /*var t = this.tweenLevelText("LEVEL COMPLETE", 3000); //TODO: localize
                     t.onComplete.add(function(target,tween){
                     },this);
@@ -604,11 +672,18 @@ BasicGame.Game.prototype = {
     },
 
     onHitLaptop: function(button, game, laptopObject) {
-        if (this.showingTutorial) return;
+        
         //console.log("hit laptop " + laptopObject);
         if (laptopObject.open) {
             this.closeLaptop(laptopObject);
-            // TODO: some visual feedback you closed the laptop
+            if (this.showingTutorial == true) {
+                this.showingTutorial = false;
+                this.time.events.removeAll();
+                if (this.tutorialText != null) this.tutorialText.destroy();
+                if (this.tutorialCursor != null) this.tutorialCursor.destroy();
+                BasicGame.seenTutorial = true;
+                this.startLevel(0,600);
+            }
         } else {
             // TOSO: some visual feedback when touching a laptop that's closed?
         }
@@ -616,56 +691,152 @@ BasicGame.Game.prototype = {
         
     },
 
-    onEndGame: function() {
+    onEndGame: function(win) {
+
         // TODO: some visual feedback you lost
+        //
+        var self = this;
 
         if (this.pauseScreen.visible)
             this.pauseScreen.visible = false;
 
-        var hiscore = this.score > BasicGame.lastScore;
-
-        this.endGameScreen.bg_hiscore.visible = hiscore;
-        this.endGameScreen.bg_gameover.visible = !this.endGameScreen.bg_hiscore.visible;
-
-        this.endGameScreen.blocker.width = this.game.width;
-        this.endGameScreen.blocker.height = this.game.height;
-        this.endGameScreen.popup.x = this.game.width * .5;
-        this.endGameScreen.popup.y = this.game.height + this.endGameScreen.popup.getBounds().height + 5;
-        this.endGameScreen.footer.x = this.game.width * .5;
-        this.endGameScreen.footer.y = this.game.height + this.endGameScreen.footer.getBounds().height + 5;
-
-        this.endGameScreen.hiscore.visible = !hiscore;
-        var t = "";
-        if (this.score < 10) t += "0";
-        if (this.score < 100) t += "0";
-        if (this.score < 1000) t += "0";
-        t += Math.floor(this.score).toString();
-        this.endGameScreen.hiscore.text = t;
-
+        var scores;
+        getScores(function(serverHighScores) {
+          scores = serverHighScores;
+        }, function() {
+          console.error("error getting scores");
+        });
         
-        for(var i = 0; i < 3; i++) {
-            this.endGameScreen.hiscorelines[i].name.text = "SDSFDSF";
-            this.endGameScreen.hiscorelines[i].points.text = "1234";
-        }
+        this.endGameScreen.loading.visible = true;
+        this.endGameScreen.hiscoretable.alpha = 0;
 
-        this.uiGroup.add(this.endGameScreen);
-        this.endGameScreen.visible = true;
-
-        this.game.add.tween(this.endGameScreen.popup.position).to( {y:this.game.height - 158}, 900, Phaser.Easing.Circular.Out, true);
-        this.game.add.tween(this.endGameScreen.footer.position).to( {y:this.game.height}, 500, Phaser.Easing.Circular.InOut, true, 900);
-
-        if (hiscore) {
-            BasicGame.lastScore = this.score;
-
-            this.sound.play('highScore');
-        } else {
-            this.sound.play('gameOver');
-
-        }
+        var endtext = new Phaser.Image(this.game,0,0,win ? 'game_wintext' : 'game_losetext');
+        endtext.anchor.set(0.5,0.5);
+        this.uiGroup.add(endtext);
+        endtext.position.setTo(this.game.width * .5, this.game.height * .5);
+        endtext.scale.setTo(0,0);
+        var t = this.game.add.tween(endtext.scale);
+        t.to( {x:1.5,y:1.5}, 850, Phaser.Easing.Cubic.Out, true);
 
         this.game.add.tween(this.music).to({volume:0}, 300).start()
         this.music = this.sound.play('startScreen', 1, true);
         this.music.onDecoded.add(function(sound){ sound.volume = 0; sound.game.add.tween(sound).to({volume:1}, 400).start()});
+
+        this.time.events.add(2500, function() {
+            var hiscore = scores && this.score > scores[scores.length-1].points;
+            var yourIndex;
+            var results = [];
+
+            if (win && hiscore) {
+                BasicGame.lastScore = this.score;
+                this.sound.play('highScore');
+            } else {
+                this.sound.play('gameOver');
+            }
+
+            if (hiscore) {
+              var myScore = this.score;
+              var newIndex = indexOfSorted(scores, 'points', myScore);
+              scores.splice(newIndex, 0, {name: '', points: myScore, yours: true});
+              function getYourPlaceInScores() {
+                if (newIndex == 0) {
+                  yourIndex = 0;
+                  return [0, 1, 2];
+                } else if (newIndex == scores.length - 1) {
+                  yourIndex = 2;
+                  return [scores.length - 3, scores.length - 2, scores.length - 1];
+                } else {
+                  yourIndex = 1;
+                  return [newIndex - 1, newIndex, newIndex + 1]
+                }
+              }
+              var indices = getYourPlaceInScores();
+              for (var ix = 0; ix < indices.length; ix++) {
+                var j = indices[ix];
+                var entry = scores[j];
+                entry.index = j;
+                results.push(entry);
+              }
+            }
+
+            console.log('did a hiscore? ' + hiscore);
+            this.endGameScreen.hiscore_top.visible = hiscore;
+            this.endGameScreen.hiscore_title.visible = hiscore;
+            this.endGameScreen.gameover_top.visible = !this.endGameScreen.hiscore_top.visible;
+            this.endGameScreen.gameover_title.visible = !hiscore;
+            this.endGameScreen.gameover_subtitle.visible = !hiscore;
+            this.endGameScreen.gameover_hiscore.visible = !hiscore;
+            this.endGameScreen.gameover_hiscorep.visible = !hiscore;
+
+            this.endGameScreen.blocker.width = this.game.width;
+            this.endGameScreen.blocker.height = this.game.height;
+            this.endGameScreen.popup.x = this.game.width * .5;
+            this.endGameScreen.popup.y = this.game.height + this.endGameScreen.popup.getBounds().height + 5;
+            this.endGameScreen.footer.x = this.game.width * .5;
+            this.endGameScreen.footer.y = this.game.height + this.endGameScreen.footer.getBounds().height + 5;
+
+            this.endGameScreen.gameover_hiscore.visible = !hiscore;
+            var t = "";
+            if (this.score < 10) t += "0";
+            if (this.score < 100) t += "0";
+            if (this.score < 1000) t += "0";
+            t += Math.floor(this.score).toString();
+            this.endGameScreen.gameover_hiscore.text = t;
+
+            if (scores) {
+                this.endGameScreen.loading.visible = false;
+                this.game.add.tween(this.endGameScreen.hiscoretable).to({alpha:1},300).start();
+            }
+            
+            for(var i = 0; i < 3; i++) {
+              if (hiscore) {
+                this.endGameScreen.hiscorelines[i].num.text = numberStringForIndex(results[i].index);
+                this.endGameScreen.hiscorelines[i].name.text = results[i].name.toUpperCase();
+                this.endGameScreen.hiscorelines[i].points.text = results[i].points;
+              } else if (scores) {
+                this.endGameScreen.hiscorelines[i].num.text = numberStringForIndex(i);
+                this.endGameScreen.hiscorelines[i].name.text = scores[i].name.toUpperCase();
+                this.endGameScreen.hiscorelines[i].points.text = scores[i].points;
+              } else {
+
+                // no high scores from server on game over
+                // will just keep loading forever i guess
+                /*
+                this.endGameScreen.hiscorelines[i].num.text = '';
+                this.endGameScreen.hiscorelines[i].name.text = '';
+                this.endGameScreen.hiscorelines[i].points.text = '';
+                */
+              }
+            }
+
+            this.uiGroup.add(this.endGameScreen);
+
+            this.endGameScreen.visible = true;
+
+            this.game.add.tween(this.endGameScreen.popup.position).to( {y:this.game.height - 158}, 900, Phaser.Easing.Circular.Out, true).onComplete.add(function() {
+                if (hiscore) {
+                    var self = this;
+                    popupTextField.call(this, this.endGameScreen.hiscorelines[yourIndex].name, function(name) {
+                      self.onSubmitHighscoreStart();
+                      var done = function() { self.onSubmitHighscoreComplete(); }
+                      setScore(name, self.score, done, done);
+                    });
+                }
+            }, this);
+
+            this.game.add.tween(this.endGameScreen.footer.position).to( {y:this.game.height}, 500, Phaser.Easing.Circular.InOut, true, 900);
+
+        }, this);
+    },
+
+
+    onSubmitHighscoreStart: function(lineIndex) {
+        this.endGameScreen.loading.visible = true;
+        this.endGameScreen.hiscoretable.alpha = 0;
+    },
+
+    onSubmitHighscoreComplete: function() {
+        this.gotoHiscores();
     },
 
     toggleFullScreen: function(button) {
@@ -691,6 +862,7 @@ BasicGame.Game.prototype = {
         TransitionToState('Game', this.stage);
     },
     gotoHiscores: function(pointer) {
+        this.resetState();
         this.game.add.tween(this.music).to({volume:0}, 300).start()
         TransitionToState('MainMenu', this.stage);
         BasicGame.openLeaderboards = true;
@@ -723,6 +895,7 @@ BasicGame.Game.prototype = {
         this.health = 100;
 
         this.feedback_gratificationCounter = 0;
+        removeFloatingInput();
     },
 
     startLevel: function(levelnumber, startDelay) {
@@ -795,7 +968,7 @@ BasicGame.Game.prototype = {
 
         
         if (this.showingTutorial != true) {
-            this.score += score;
+            this.score = clamp(this.score + score,0,99999);
             this.showScore(score);
         }
 
@@ -885,7 +1058,7 @@ BasicGame.Game.prototype = {
 
     },
     showScore: function(amount) {
-        this.score += 50;
+        
         var pos = this.gameGroup.toLocal(this.input.activePointer);
         var img = '';
         if (amount == 10) img = 'game_points10';
@@ -916,8 +1089,11 @@ BasicGame.Game.prototype = {
         this.pauseScreen.popup.x = this.game.width * .5;
         this.pauseScreen.popup.y = this.game.height * .5;
 
-        this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5;
-        this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
+        //this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5/;
+        //this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
+
+        this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
+        this.pauseButton.y = this.pauseButton.height*.5 + 10;
     },
 
     onKeyDown: function(event) {
@@ -926,14 +1102,26 @@ BasicGame.Game.prototype = {
             this.togglePause();
         }
         // cheats
-        if (BasicGame.cheatCodes) {
+        if (BasicGame.cheatCodes && floatingInput==null) {
+            if (k == Phaser.KeyCode.B) {
+              this.score = 951;
+              this.onEndGame(true);
+            }
+            if (k == Phaser.KeyCode.L) {
+              this.score = 801;
+              this.onEndGame(true);
+            }
             if (k == Phaser.KeyCode.P) {
-                this.score = BasicGame.lastScore +1;
-                this.onEndGame();
+                this.score = 99999;
+                this.onEndGame(true);
             }
             if (k == Phaser.KeyCode.O) {
+                this.score = 500;
+                this.onEndGame(true);
+            }
+            if (k == Phaser.KeyCode.L) {
                 this.score = BasicGame.lastScore -1;
-                this.onEndGame();
+                this.onEndGame(false);
             }
             if (k == Phaser.KeyCode.I) {
                 this.playing = false;
@@ -947,10 +1135,73 @@ BasicGame.Game.prototype = {
                     if (this.currentLevelNumber < BasicGame.leveldata.levels.length -1)
                         this.startLevel(this.currentLevelNumber+1, 0);
                     else
-                        this.onEndGame();
+                        this.onEndGame(true);
                 }
             }
         }
     }
 
 };
+
+var px = function(n) { return n + "px"; };
+
+var worldPos = function(el) {
+  parentPos = el.parent ? worldPos(el.parent) : [0, 0];
+  return [el.x + parentPos[0], el.y + parentPos[1]];
+};
+
+var floatingInput;
+
+function removeFloatingInput() {
+  if (floatingInput) {
+    floatingInput.parentNode.removeChild(floatingInput);
+    floatingInput = null;
+  }
+}
+
+function popupTextField(el, callback) {
+  var input = document.createElement("input");
+  input.className = "text-overlay";
+  input.setAttribute("type", "text");
+  input.style.position = "absolute";
+  input.setAttribute("placeholder", "YOUR NAME");
+  input.onkeypress = function(e) {
+    var event = e || window.event;
+    var charCode = event.which || event.keyCode;
+    var value = input.value.replace(/^\s+|\s+$/g,'');
+    if (charCode == '13')  {
+      if (value.length > 0)
+        submit(value);
+      return false;
+    }
+  };
+
+  var self = this;
+  var update = function() {
+    var F = window.innerWidth/self.game.width;
+    var wp = worldPos(el);
+    input.style.left = px(F*wp[0]);
+    input.style.top = px(F*wp[1] - F*el.height);
+    input.setAttribute('maxlength', 10);
+    el.text = '';
+  };
+  setTimeout(update, 100);
+  document.body.appendChild(input);
+  var oldResize = window.onresize;
+  window.onresize = function() {
+    if (oldResize) oldResize.apply(this, arguments);
+    setTimeout(update, 100);
+  };
+
+  function submit(name) {
+    input.onkeypress = null;
+    window.onresize = oldResize;
+    el.text = name;
+    input.parentNode.removeChild(input);
+    floatingInput = null;
+    callback(name);
+  };
+
+  floatingInput = input;
+}
+

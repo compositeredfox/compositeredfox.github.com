@@ -1,7 +1,22 @@
+function getGameSize() {
+    var w = window.innerWidth * window.devicePixelRatio, h = window.innerHeight * window.devicePixelRatio;
+    var aspect = w/h;
+    var targetaspect = 1280/720;
+    aspect = clamp(aspect, 1.32, 1.9);
+    var res = {x:1280,y:720};
+    
+    if (aspect > targetaspect)
+        res.x = res.y  * aspect;
+    else
+        res.y = res.x / aspect;
 
+    console.log("screen size " + w+"x"+h+" aspect: " + aspect + " target aspect:" + targetaspect + " result: " + res.x+"x"+res.y);
+    return res;
+}
 
-function Label(context, x, y, text, fontSize, fontColor, align) {
-    var t = new Phaser.Text(context.game, x, y, text, { font: fontSize + "px Pebble", fill: fontColor, align: align })
+function Label(context, x, y, text, fontSize, fontColor, align, font) {
+    if (font == null) font = "Pebble"
+    var t = new Phaser.Text(context.game, x, y, text, { font: fontSize + "px " + font, fill: fontColor, align: align })
     if (align=='center')t.anchor.set(0.5,0.5);
     if (align=='left')t.anchor.set(0,0.5);
     if (align=='right')t.anchor.set(1,0.5);
@@ -61,7 +76,7 @@ function TransitionToState(nextState, stage) {
     }
     BasicGame.transition.bg.width = stage.width;
     BasicGame.transition.bg.height = stage.height;
-    BasicGame.transition.bg.y = stage.height;
+    //BasicGame.transition.bg.y = stage.height;
     //BasicGame.transition.x = stage.game.width * .5;
     //BasicGame.transition.y = stage.game.height * .5;
     //BasicGame.transition.bg.scale.set(0,0);
@@ -69,8 +84,8 @@ function TransitionToState(nextState, stage) {
 
     stage.addChildAt(BasicGame.transition,stage.children.length-1);
     
+    /*
     var duration = 600;
-    
     scaleTo = (stage.game.width / BasicGame.transition.bg.texture.width) * 1.5;
 
     var tweenIn = stage.game.add.tween(BasicGame.transition.bg.position);
@@ -87,19 +102,36 @@ function TransitionToState(nextState, stage) {
     }, this);
 
     tweenIn.start();
+    */
+
+    var anim = BasicGame.transition.bg.animations.play("in");
+    anim.onComplete.add(function(context, tween){ 
+        tween.game.sound.stopAll();
+        tween.game.tweens.removeAll();
+        tween.game.state.start(nextState);
+        tween.game.state.onStateChange.add(TransitionFromState, tween.game.state, 0, tween.game);
+    }, this);
 }
 function TransitionFromState() {
-    var duration = 400;
 
     this.onStateChange.remove(TransitionFromState, this);
+    /*
+    var duration = 400;
     var tweenOut = this.game.add.tween(BasicGame.transition.bg.position);
     tweenOut.to( { y:-this.game.stage.height }, duration, Phaser.Easing.Circular.In);
     tweenOut.onComplete.add(function(context, tween){ 
         tween.game.stage.removeChild(BasicGame.transition);
         BasicGame.transition.visible = false;
     }, game);
+    */
 
-    tweenOut.start();
+    //tweenOut.start();
+
+    var anim = BasicGame.transition.bg.animations.play("out");
+    anim.onComplete.add(function(context, tween){ 
+        tween.game.stage.removeChild(BasicGame.transition);
+        BasicGame.transition.visible = false;
+    }, game);
 
 }
 
@@ -161,10 +193,12 @@ function UpdateProgressBar(game, percentage, tint, scorebar) {
         s.width = s.m.width;
     }
     percentage = clamp01(percentage);
-    s.m.width = s.width * percentage;
-    s.m.x = s.l.width;
-    s.r.x = s.m.x + s.m.width - 1;
-    s.l.tint = s.m.tint = s.r.tint = tint;
+    if (s.m.width != percentage) {
+        s.m.width = s.width * percentage;
+        s.m.x = s.l.width;
+        s.r.x = s.m.x + s.m.width - 1;
+        s.l.tint = s.m.tint = s.r.tint = tint;
+    }
     return s;
 }
 
@@ -180,3 +214,137 @@ function UpdateGameCursor(game, updateOrder) {
     BasicGame.cursor.y = lerp(BasicGame.cursor.y, pos.y, speed);
 
 }
+
+function values(map) {
+  var vals = [];
+  for (var key in map) {
+    var val = map[key];
+    vals.push(val);
+  }
+  return vals;
+}
+
+function cmp(attr, a, b) {
+  var a_val = parseInt(a[attr], 10);
+  var b_val = parseInt(b[attr], 10);
+  console.assert(!isNaN(a_val));
+  console.assert(!isNaN(b_val));
+  if (a_val < b_val) return -1;
+  else if (a_val > b_val) return 1;
+  return 0;
+}
+
+function indexOfSorted(array, attr, val) {
+  for (var i = 0; i < array.length; ++i) {
+    var arrVal = parseInt(array[i][attr], 10);
+    console.assert(!isNaN(arrVal));
+    if (val > arrVal)
+      return i;
+  }
+
+  return array.length;
+}
+
+var scoresUrl = "http://telia-ethics.dev.wolffolins.com/scores";
+var authHeader = 'Basic dGVsaWEtZXRoaWNzOjNleGVickVi'; // derived from user/pass
+
+function JSONHttpRequest() {
+	var _xmlHttpRequest = new XMLHttpRequest(),
+	  _responseJSON = null,
+	  _userContentType = false,
+	  _self = this;
+
+	var property = {
+		get: function() {
+			try { _responseJSON = _xmlHttpRequest.responseText ? (!_responseJSON ? JSON.parse(_xmlHttpRequest.responseText) : _responseJSON) : null; }
+			catch (e) { if (_self.strictJSON) throw e; }
+			return _responseJSON;
+		},
+		enumerable: true,
+		configurable: true
+	}
+	
+	_self.strictJSON = true;
+	Object.defineProperty(_self, 'responseJSON', property);
+	
+	_self.sendJSON = function(data) {
+    	try {
+    		data = JSON.stringify(data);
+    		_responseJSON = null;
+    		if (!_userContentType) _xmlHttpRequest.setRequestHeader('Content-Type', 'application/json;charset=encoding');    		
+    		_userContentType = false;
+		}
+		catch (e) {
+			if (_self.strictJSON)
+				throw e;
+		}
+		_xmlHttpRequest.send(data);
+    }
+	
+	function proxy(name) {
+		try {
+			if ((typeof _xmlHttpRequest[name]) == 'function') {
+				_self[name] = function() {
+					if (name == 'setRequestHeader')
+						_userContentType = arguments[0].toLowerCase() == 'content-type';
+					return _xmlHttpRequest[name].apply(_xmlHttpRequest, Array.prototype.slice.apply(arguments));
+				};
+			}
+			else {
+				property.get = function() { return _xmlHttpRequest[name]; }
+				property.set = function(value) { _xmlHttpRequest[name] = value; }
+				Object.defineProperty(_self, name, property);	
+			}
+		}
+		catch (e) { /* NOTE Swallow any exceptions, which may rise here. */ }
+	}
+	
+	proxy('onreadystatechange');
+	for (n in _xmlHttpRequest)
+		proxy(n);
+}
+
+function getScores(successCallback, errorCallback) {
+  var request = new JSONHttpRequest();
+  request.open("GET", scoresUrl, true);
+  request.setRequestHeader('Authorization', authHeader);
+  request.onreadystatechange = function() {
+    if (request.readyState !== 4)
+      return;
+
+    if (request.status !== 200)  {
+      errorCallback(request.responseText);
+      return;
+    } 
+
+    var serverHighScores = request.responseJSON;
+    var scores = values(serverHighScores);
+
+    for (var i = 0; i < scores.length; ++i)
+      scores[i].points = parseInt(scores[i].points, 10);
+
+    // return scores sorted
+    scores.sort(function(a, b) { return -cmp('points', a, b); });
+
+    successCallback(scores);
+  };
+
+  request.send(null);
+}
+
+function setScore(name, points, successCallback, errorCallback) {
+  var request = new JSONHttpRequest();
+  request.open("POST", scoresUrl, true);
+  request.setRequestHeader('Authorization', authHeader);
+  request.onreadystatechange = function() {
+    if (request.readyState !== 4) return;
+    if (request.status !== 200)  {
+      errorCallback(request.responseText);
+    } else { 
+      successCallback(request.responseText);
+    }
+  };
+  request.sendJSON({name: name, points: points});
+}
+
+function numberStringForIndex(i) { return (i<9?"0":"") + (i+1); }

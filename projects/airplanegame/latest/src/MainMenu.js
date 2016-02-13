@@ -39,75 +39,78 @@ BasicGame.MainMenu.prototype = {
         this.button_start = this.game.add.existing(ButtonWithTextOver(this, this.game.width * .5, this.game.height * 0.65, "START", 'button_title', 'button_title_over', 12, "#000000", this.startGame)); //TODO: localize
         //this.button_hiscores = this.game.add.existing(ButtonWithText(this, this.game.width - 90, this.game.height - 30, "- High Scores -", 'graphic_smallbutton', 24, "#ffffff", this.openLeaderboards)); //TODO: localize
         //this.button_hiscores.alpha = 0.7;
-
-        this.footer = this.game.add.button(this.game.width * .5,this.game.height,'mainmenu_footer',this.openUrl, this);
-        this.footer.anchor.set(0.5,1);
-
+        
+        
+        this.footer = this.game.add.group();
+        this.footer.position.set(this.game.width * .5,this.game.height);
+        this.footer.add(new Phaser.Button(this.game, 0, 0,'mainmenu_footer',this.openUrl, this)).anchor.set(0.5,1);
+        
+        var t = this.footer.add(Label(this, 370, -33, "See what else you shouldn't do at work: View our code of conduct", 14, "#000000", 'right', 'Helvetica'));
+        t.addColor("#b347e9", "See what else you shouldn't do at work:".length);
+		
         // leaderboards popup
-        /*
-        this.leaderboardsDrag = new Phaser.Sprite(this.game, 0, 0, 'mainmenu_cloud');
-        this.leaderboardsDrag.width = game.width;
-        this.leaderboardsDrag.height = game.height;
-        this.leaderboardsDrag.alpha = 0.5;
-        this.leaderboardsDrag.inputEnabled = true;
-        this.leaderboardsDrag.input.enableDrag();
-        this.leaderboardsDrag.events.onDragStart.add(this.onLeaderboardDragStart);
-        this.leaderboardsDrag.events.onDragUpdate.add(this.onLeaderboardDrag);
-        this.leaderboardsDrag.events.onDragStop.add(this.onLeaderboardDragStop);
-        this.game.add.existing(this.leaderboardsDrag);
-        */
 
         this.leaderboards = this.game.add.group();
         this.leaderboards.x = this.game.width * .5;
-        
-        var listheight = 150 + 15 * 63 + 30;
-        var listwidth = 850;
+        this.leaderboards.y = this.game.height * .5;
 
-        this.leaderboards.bg = this.game.add.graphics(0,0, this.leaderboards);
-        this.leaderboards.bg.beginFill(0xF2F2F2, 1.0);
-        this.leaderboards.bg.drawRect(-listwidth * .5,-listheight,listwidth, listheight);
-        this.leaderboards.bg.endFill();
-        this.leaderboards.table = this.leaderboards.add(new Phaser.Group(this.game));
+        this.leaderboards.popup = this.leaderboards.add(new Phaser.Group(this.game));
+        //this.leaderboards.popup.add(MenuBackground(this.game, 0, 0, 800, 660));
         
+        this.leaderboards.bg = this.leaderboards.popup.add(new Phaser.Image(this.game,0,0,'leaderboards_bg'));
+        this.leaderboards.bg.anchor.set(0.5,0.5);
+
+        this.leaderboards.title = this.leaderboards.popup.add(Label(this,-365,-232, "HIGH SCORE\nBOARD", 60, "#990AE3", 'left'));
+        this.leaderboards.title.lineSpacing = -15;
+        this.leaderboards.title.anchor.set(0,0);
+
+        this.leaderboards.hiscoretable = this.leaderboards.popup.add(new Phaser.Group(this.game));
         this.leaderboards.hiscorelines = [];
-        for (var i = 0; i < 15; i++) {
-            var y = -1055 + 20 + 63 * i;
-            this.leaderboards.hiscorelines[i] = this.leaderboards.table.add(new Phaser.Group(this.game));
-            this.leaderboards.hiscorelines[i].num = new Phaser.Text(this.game, -314, y, "0"+(i+1), { font: "40px Pebble", fill: "#000000", align: "right"});
-            this.leaderboards.hiscorelines[i].num.anchor.set(1,1);
-            this.leaderboards.hiscorelines[i].name = new Phaser.Text(this.game, -292, y, "ASDFG", { font: "40px Pebble", fill: "#000000", align: "left"});
-            this.leaderboards.hiscorelines[i].name.anchor.set(0,1);
-            this.leaderboards.hiscorelines[i].points = new Phaser.Text(this.game, 351, y, "1234", { font: "40px Pebble", fill: "#000000", align: "left"});
-            this.leaderboards.hiscorelines[i].points.anchor.set(1,1);
-            this.leaderboards.table.add(this.leaderboards.hiscorelines[i].num);
-            this.leaderboards.table.add(this.leaderboards.hiscorelines[i].name);
-            this.leaderboards.table.add(this.leaderboards.hiscorelines[i].points);
-            if (i < 14) {
-	            this.leaderboards.hiscorelines[i].separator = new Phaser.Image(this.game, 0, y + 4, 'leaderboards_separator');
-	            this.leaderboards.hiscorelines[i].separator.anchor.set(0.5,0.5);
-	            this.leaderboards.table.add(this.leaderboards.hiscorelines[i].separator);
-	        }
+        for (var i = 0; i < 10; i++) {
+            var x = i < 5 ? -360 : 45;
+            var y = -47 + 38 * (i%5);
+            this.leaderboards.hiscorelines[i] = this.leaderboards.hiscoretable.add(new Phaser.Group(this.game));
+            this.leaderboards.hiscorelines[i].num = new Phaser.Text(this.game, x, y, numberStringForIndex(i), { font: "24px Pebble", fill: "#000000", align: "right"});
+            this.leaderboards.hiscorelines[i].num.anchor.set(0,0);
+            this.leaderboards.hiscorelines[i].name = new Phaser.Text(this.game, x + 38, y, "YOUR NAME", { font: "24px Pebble", fill: "#000000", align: "left"});
+            this.leaderboards.hiscorelines[i].name.anchor.set(0,0);
+            this.leaderboards.hiscorelines[i].points = new Phaser.Text(this.game, x + 304, y, "000", { font: "24px Pebble", fill: "#000000", align: "right"});
+            this.leaderboards.hiscorelines[i].points.anchor.set(1,0);
+            this.leaderboards.hiscorelines[i].p = new Phaser.Text(this.game, x + 306, y + 9, "p", { font: "14px Helvetica", fill: "#000000", align: "left"});
+            this.leaderboards.hiscorelines[i].p.anchor.set(0,0);
+            this.leaderboards.hiscoretable.add(this.leaderboards.hiscorelines[i].num);
+            this.leaderboards.hiscoretable.add(this.leaderboards.hiscorelines[i].name);
+            this.leaderboards.hiscoretable.add(this.leaderboards.hiscorelines[i].points);
+            this.leaderboards.hiscoretable.add(this.leaderboards.hiscorelines[i].p);
+
         };
-
-        
-        var top = new Phaser.Image(this.game,0,-listheight + 1,'leaderboards_top');
-        top.anchor.set(0.5,1);
-        this.leaderboards.add(top);
-
-        this.leaderboards.playButton = this.leaderboards.add(ButtonWithTextOver(this,0,-91,'PLAY AGAIN', 'button_leaderboards', 'button_leaderboards_over', 12, '#FFFFFF', this.startGame));
-        this.leaderboards.playButton.getChildAt(0).onInputOver.add(this.onPlayButtonOver, this);
-        this.leaderboards.playButton.getChildAt(0).onInputOut.add(this.onPlayButtonOut, this);
-        this.onPlayButtonOut(); // set text color
-
-        var close = new Phaser.Button(this.game,listwidth * .5 + 3,-listheight-top.height-10,'leaderboards_close');
-        close.anchor.set(1,1);
-        close.onInputDown.add(this.closeLeaderboards,this);
-        this.leaderboards.add(close);
+        this.leaderboards.setScores = function(scores) {
+          for (var i = 0; i < 10; ++i) {
+            var score = scores[i];
+            var line = this.hiscorelines[i];
+            if (!score)
+              line.visible = false;
+            else {
+              line.visible = true;
+              line.num.text = numberStringForIndex(i);
+              line.name.text = score.name.toUpperCase();
+              line.points.text = score.points;
+            }
+          }
+        }
+        this.leaderboards.button_hiscore = ButtonWithTextOver(this,-218, 204, "QUIT", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.closeLeaderboards);
+        this.leaderboards.popup.add(this.leaderboards.button_hiscore);
+        this.leaderboards.button_restart = ButtonWithTextOver(this,218, 204, "PLAY AGAIN", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.startGame);
+        this.leaderboards.popup.add(this.leaderboards.button_restart);
 		
+        this.leaderboards.loading = this.leaderboards.popup.add(new Phaser.Image(this.game,0,45, 'loading'));
+        this.leaderboards.loading.anchor.set(0.5,0.5);
+        this.leaderboards.loading.scale.set(0.4,0.4);
+
         this.leaderboards.visible = false;
 
-        this.scale.setResizeCallback(this.gameResized, this);
-        this.gameResized();
+        this.scale.setResizeCallback(this.onGameResized, this);
+        this.onGameResized();
 
         UpdateGameCursor(this.game,-1);
 
@@ -124,8 +127,13 @@ BasicGame.MainMenu.prototype = {
 
 	update: function () {
 
+		if (this.game.paused)
+			return;
+
+		this.button_start.y = this.game.height * .65;
+
 		this.img_title.x = this.game.width * .5;
-		this.img_title.y = this.game.height * .33;
+		this.img_title.y = this.game.height * .65 - 150;
 		var s = 0.9 + Math.sin(this.game.time.time * 0.001 + 0.2) * 0.01;
 		this.img_title.scale.setTo(s,s);
 
@@ -142,6 +150,10 @@ BasicGame.MainMenu.prototype = {
 			this.clouds[1].y = this.game.height * (0.55 + Math.random() * 0.3);
 		}
 
+		if (this.leaderboards.loading.visible) {
+			this.leaderboards.loading.angle = -this.game.time.time * 0.2;
+		}
+
 		//console.log(BasicGame.transition.mask.scale.x);
 
 		UpdateGameCursor(this.game);
@@ -155,7 +167,6 @@ BasicGame.MainMenu.prototype = {
 
 	startGame: function (pointer) {
 
-
 		if (!this.music.isDecoded) 
 			this.music.destroy();
 		else
@@ -165,41 +176,36 @@ BasicGame.MainMenu.prototype = {
 	},
 	openLeaderboards: function (pointer) {
 		this.leaderboards.visible = true;
-		this.leaderboards.y = this.leaderboards.getBounds().height + 1;
+		this.leaderboards.popup.visible = true;
+		this.leaderboards.y = this.game.height * .5;
+
+		this.leaderboards.loading.visible = true;
+		this.leaderboards.hiscoretable.alpha = 0.0;
+
+    var self = this;
+
+    var leaderboards = this.leaderboards;
+    getScores(function(scores) {
+      self.leaderboards.setScores(scores);
+      self.leaderboards.loading.visible = false;
+      self.game.add.tween(self.leaderboards.hiscoretable).to({alpha:1},300).start();
+    }, function(err) {
+    });
+
+		/*
 		//var t = this.game.add.tween(this.leaderboards.position).to( {y:this.leaderboards.getBounds().height + 80}, 700, Phaser.Easing.Circular.InOut, true, 0);
-		var t = this.game.add.tween(this.leaderboards.position).to( {y:this.game.height}, 700, Phaser.Easing.Circular.InOut, true, 0);
+		var t = this.game.add.tween(this.leaderboards.position).to( {y:this.game.height * .5 - this.leaderboards.popup.getBounds().height * .25}, 700, Phaser.Easing.Circular.Out, true, 0);
 		t.onStart.add(function(target,tween,popup) {
 			//popup.y = popup.getBounds().height + tween.game.height + 1;
 			popup.visible = true;
 		}, this, 0, this.leaderboards);
+		*/
 	},
 	closeLeaderboards: function(pointer) {
-		var t = this.game.add.tween(this.leaderboards.position).to( {y:this.leaderboards.getBounds().height + this.game.height + 20}, 700, Phaser.Easing.Circular.InOut, true, 0);
+		var t = this.game.add.tween(this.leaderboards.scale).to( {x:0,y:0}, 200, Phaser.Easing.Circular.Out, true, 0);
 		t.onComplete.add(function(target, tween, popup){ 
 	        popup.visible = false;
 	    }, this, 0, this.leaderboards);
-	},
-	onLeaderboardDragStart: function(sprite, pointer) {
-		var context = pointer.game.state.getCurrentState();
-		//context._dragStartY = context.leaderboards.dragButton.y;
-		context._dragStartPos = context.leaderboards.context.leaderboards.y;
-		console.log('start');
-	},
-	onLeaderboardDrag: function(sprite, pointer) {
-		var context = pointer.game.state.getCurrentState();
-		if (!context.leaderboards.visible)
-			return;
-		context.leaderboardsDrag.x = 0;
-		var dif = context.leaderboardsDrag.y - sprite.input.dragStartPoint.y;//context._dragStartY;
-
-		context.leaderboards.y = context._dragStartPos + dif * (context.game.height / 1080);
-        
-		console.log('dragged ' + dif );
-	},
-	onLeaderboardDragStop: function(sprite, pointer) {
-		var context = pointer.game.state.getCurrentState();
-		context.leaderboardsDrag.x = 0;
-        context.leaderboardsDrag.y = 0;
 	},
 	openUrl: function(pointer) {
 		window.open("http://www.google.com", "_blank");
@@ -210,21 +216,27 @@ BasicGame.MainMenu.prototype = {
 	onPlayButtonOut: function(pointer) {
 		this.leaderboards.playButton.getChildAt(1).tint = 0x990AE3;
 	},
-	gameResized: function () {
+	onGameResized: function () {
 		//this.scale.refresh();
+		/*var newSize = getGameSize();
+		this.game.scale.setupScale(newSize.x,newSize.y);
+		this.game.scale.refresh();
 		var w = this.game.width;
 		var h = this.game.height;
-		//console.log("gameResized " + w + "x" + h);
+		console.log("onGameResized " + w + "x" + h);
+		*/
+
 
 		//this.button_start.x = this.game.width * .5;
 		//this.button_start.y = this.game.height * 0.61;
         //this.button_hiscores.x = this.game.width - this.button_hiscores.width * .5 - 10;
         //this.button_hiscores.y = this.game.height - this.button_hiscores.height * .5 - 10;
-        this.footer.x = w * .5;
-        this.footer.y = h;
+        //this.footer.x = w * .5;
+        //this.footer.y = h;
 
-        this.leaderboards.x = this.game.width * .5;
-        this.leaderboards.y = clamp(this.leaderboards.y, -99999,this.game.height);
+        //this.leaderboards.x = this.game.width * .5;
+        //this.leaderboards.y = clamp(this.leaderboards.y, -99999,this.game.height);
+        this.footer.position.set(this.game.width * .5,this.game.height);
     }
 
 
