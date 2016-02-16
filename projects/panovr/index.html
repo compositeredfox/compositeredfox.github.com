@@ -29,7 +29,7 @@
   <script src="js/lity.js"></script>
   <script src="js/looper.min.js"></script>
 
-
+  
 
 </head>
 <body>
@@ -46,7 +46,47 @@
   <div class="section">
       <div class="container u-max-full-width" style="text-align:left; font-size:18px;">
 
-        <iframe class="u-max-full-width" style="height:31em; border-radius: 5px;" src="https://player.vimeo.com/video/139601727?color=1f282b&title=0&byline=0&portrait=0" width="100%" height="100%" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+        <!--<iframe id="ytplayer" class="u-max-full-width" style="height:31em; border-radius: 5px;" width="100%" height="100%" src="https://www.youtube.com/embed/ym5ybqkCVX8?enablejsapi=1" frameborder="0" allowfullscreen></iframe>-->
+        <div id="player" class="u-max-full-width" style="width:100%; height:30.45em; border-radius: 10px; background-color: transparent;"></div>
+        <script>
+          // 2. This code loads the IFrame Player API code asynchronously.
+          var tag = document.createElement('script');
+
+          tag.src = "https://www.youtube.com/iframe_api";
+          var firstScriptTag = document.getElementsByTagName('script')[0];
+          firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+          // 3. This function creates an <iframe> (and YouTube player)
+          //    after the API code downloads.
+          var player;
+          function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+              width: '100%',
+              height: '100%',
+              videoId: 'iUWQ9qJDQUU',
+              events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+              }
+            });
+          }
+
+          // 4. The API will call this function when the video player is ready.
+          function onPlayerReady(event) {
+            //
+            player.height = player.width * (1280/720);
+          }
+
+          // 5. The API calls this function when the player's state changes.
+          //    The function indicates that when playing a video (state=1),
+          //    the player should play for six seconds and then stop.
+          function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+              event.target.setPlaybackQuality('hd720');
+            }
+          }
+        </script>
+
         <p style="margin-top:60px;"></p>
         <p>PANORAMICAL is an immersive interactive experience about exploring “musical landscapes”. Players shape the abstract worlds’ visuals and sounds.</p>
         
@@ -312,8 +352,6 @@
         
 
         <p style="margin-top: 50px;">Since we would take content from the original game, producing PANORAMICAL VR would let us heavily focus on making a great interface for the Vive.</p>
-
-        <p style="margin-top: 50px;">The desktop version was designed to be a tactile, beautiful, immersive experience that gave players fine intuitive control. The Vive's tracking lets us bring this natural control to our players.</p>
 
         <p style="margin-top: 50px;">PANORAMICAL in VR is something we really want to explore. Because it's so unique—relaxing, introspective, playful, performative—we think players around the world would see it as essential to their new growing VR game library, and we're looking forward to working with HTC to make this a reality.</p>
 
