@@ -19,30 +19,30 @@ BasicGame.MainMenu.prototype = {
 		/*this.music = this.add.audio('titleMusic');
 		this.music.play();*/
 
-		var bg = this.add.image(0, 0, 'mainmenu_bg');
-		bg.width = this.game.width;
-		bg.height = this.game.height;
+		this.bg = this.add.image(0, 0, 'mainmenu_bg');
+		this.bg.width = BasicGame.width;
+		this.bg.height = BasicGame.height;
 
-		this.clouds[0] = this.add.image(this.game.width * .8, this.game.height * (0.05 + Math.random() * 0.2), 'mainmenu_cloud');
-		this.clouds[1] = this.add.image(this.game.width * .2, this.game.height * (0.55 + Math.random() * 0.3), 'mainmenu_cloud');
+		this.clouds[0] = this.add.image(BasicGame.width * .8, BasicGame.height * (0.05 + Math.random() * 0.2), 'mainmenu_cloud');
+		this.clouds[1] = this.add.image(BasicGame.width * .2, BasicGame.height * (0.55 + Math.random() * 0.3), 'mainmenu_cloud');
 
-		this.sprite_airplane = this.add.image(this.game.width * .19, this.game.height * .6, 'mainmenu_plane');
+		this.sprite_airplane = this.add.image(BasicGame.width * .19, BasicGame.height * .6, 'mainmenu_plane');
 		this.sprite_airplane.anchor.set(0.5,0.5);
 
-		this.img_title = this.add.image(this.game.width * .5, this.game.height * .3, 'mainmenu_title');
+		this.img_title = this.add.image(BasicGame.width * .5, BasicGame.height * .3, 'mainmenu_title');
 		this.img_title.anchor.set(0.5,0.5);
 		/*
-        var title = Label(this, this.game.width * .5, this.game.height * .4, "DON'T PLAY THIS\nGAME AT WORK", 88, "#ffffff", 'center'); //TODO: localize
+        var title = Label(this, BasicGame.width * .5, BasicGame.height * .4, "DON'T PLAY THIS\nGAME AT WORK", 88, "#ffffff", 'center'); //TODO: localize
         title.setShadow(0,0,'rgba(0,0,0,0.12)',10);
         this.game.add.existing(title);
 		*/
-        this.button_start = this.game.add.existing(ButtonWithTextOver(this, this.game.width * .5, this.game.height * 0.65, "START", 'button_title', 'button_title_over', 12, "#000000", this.startGame)); //TODO: localize
-        //this.button_hiscores = this.game.add.existing(ButtonWithText(this, this.game.width - 90, this.game.height - 30, "- High Scores -", 'graphic_smallbutton', 24, "#ffffff", this.openLeaderboards)); //TODO: localize
+        this.button_start = this.game.add.existing(ButtonWithTextOver(this, BasicGame.width * .5, BasicGame.height * 0.65, "START", 'button_title', 'button_title_over', 12, "#000000", this.startGame)); //TODO: localize
+        //this.button_hiscores = this.game.add.existing(ButtonWithText(this, BasicGame.width - 90, BasicGame.height - 30, "- High Scores -", 'graphic_smallbutton', 24, "#ffffff", this.openLeaderboards)); //TODO: localize
         //this.button_hiscores.alpha = 0.7;
         
         
         this.footer = this.game.add.group();
-        this.footer.position.set(this.game.width * .5,this.game.height);
+        this.footer.position.set(BasicGame.width * .5,BasicGame.height);
         this.footer.add(new Phaser.Button(this.game, 0, 0,'mainmenu_footer',this.openUrl, this)).anchor.set(0.5,1);
         
         var t = this.footer.add(Label(this, 370, -33, "See what else you shouldn't do at work: View our code of conduct", 14, "#000000", 'right', 'Helvetica'));
@@ -51,8 +51,6 @@ BasicGame.MainMenu.prototype = {
         // leaderboards popup
 
         this.leaderboards = this.game.add.group();
-        this.leaderboards.x = this.game.width * .5;
-        this.leaderboards.y = this.game.height * .5;
 
         this.leaderboards.popup = this.leaderboards.add(new Phaser.Group(this.game));
         //this.leaderboards.popup.add(MenuBackground(this.game, 0, 0, 800, 660));
@@ -109,7 +107,7 @@ BasicGame.MainMenu.prototype = {
 
         this.leaderboards.visible = false;
 
-        this.scale.setResizeCallback(this.onGameResized, this);
+        this.scale.onSizeChange.add(this.onGameResized, this);
         this.onGameResized();
 
         UpdateGameCursor(this.game,-1);
@@ -130,24 +128,20 @@ BasicGame.MainMenu.prototype = {
 		if (this.game.paused)
 			return;
 
-		this.button_start.y = this.game.height * .65;
-
-		this.img_title.x = this.game.width * .5;
-		this.img_title.y = this.game.height * .65 - 150;
 		var s = 0.9 + Math.sin(this.game.time.time * 0.001 + 0.2) * 0.01;
 		this.img_title.scale.setTo(s,s);
 
-		this.sprite_airplane.y = this.game.height * .75 + Math.sin(this.game.time.time * 0.0015) * 10;
+		this.sprite_airplane.y = BasicGame.height * .75 + Math.sin(this.game.time.time * 0.0015) * 10;
 
 		this.clouds[0].x -= (this.game.time.elapsedMS / 1000) * 400;
 		if (this.clouds[0].x < -this.clouds[0].width) {
-			this.clouds[0].x = this.game.width + 40 + Math.random() * 40;
-			this.clouds[0].y = this.game.height * (0.05 + Math.random() * 0.3);
+			this.clouds[0].x = BasicGame.width + 40 + Math.random() * 40;
+			this.clouds[0].y = BasicGame.height * (0.05 + Math.random() * 0.3);
 		}
 		this.clouds[1].x -= (this.game.time.elapsedMS / 1000) * 350;
 		if (this.clouds[1].x < -this.clouds[0].width) {
-			this.clouds[1].x = this.game.width + 40 + Math.random() * 40;
-			this.clouds[1].y = this.game.height * (0.55 + Math.random() * 0.3);
+			this.clouds[1].x = BasicGame.width + 40 + Math.random() * 40;
+			this.clouds[1].y = BasicGame.height * (0.55 + Math.random() * 0.3);
 		}
 
 		if (this.leaderboards.loading.visible) {
@@ -171,13 +165,14 @@ BasicGame.MainMenu.prototype = {
 			this.music.destroy();
 		else
 			this.game.add.tween(this.music).to({volume:0}, 300).start()
+		this.scale.onSizeChange.remove(this.onGameResized, this);
 		TransitionToState('Game', this.stage);
 
 	},
 	openLeaderboards: function (pointer) {
 		this.leaderboards.visible = true;
 		this.leaderboards.popup.visible = true;
-		this.leaderboards.y = this.game.height * .5;
+		this.leaderboards.y = BasicGame.height * .5;
 
 		this.leaderboards.loading.visible = true;
 		this.leaderboards.hiscoretable.alpha = 0.0;
@@ -194,7 +189,7 @@ BasicGame.MainMenu.prototype = {
 
 		/*
 		//var t = this.game.add.tween(this.leaderboards.position).to( {y:this.leaderboards.getBounds().height + 80}, 700, Phaser.Easing.Circular.InOut, true, 0);
-		var t = this.game.add.tween(this.leaderboards.position).to( {y:this.game.height * .5 - this.leaderboards.popup.getBounds().height * .25}, 700, Phaser.Easing.Circular.Out, true, 0);
+		var t = this.game.add.tween(this.leaderboards.position).to( {y:BasicGame.height * .5 - this.leaderboards.popup.getBounds().height * .25}, 700, Phaser.Easing.Circular.Out, true, 0);
 		t.onStart.add(function(target,tween,popup) {
 			//popup.y = popup.getBounds().height + tween.game.height + 1;
 			popup.visible = true;
@@ -217,26 +212,41 @@ BasicGame.MainMenu.prototype = {
 		this.leaderboards.playButton.getChildAt(1).tint = 0x990AE3;
 	},
 	onGameResized: function () {
+		console.log('resize mainmenu');
+
+		this.bg.width = BasicGame.width;
+		this.bg.height = BasicGame.height;
+
+		this.button_start.x = BasicGame.width * .5;
+		this.button_start.y = BasicGame.height * .65;
+
+		this.img_title.x = BasicGame.width * .5;
+		this.img_title.y = BasicGame.height * .65 - 150;
+
+		this.leaderboards.x = BasicGame.width * .5;
+        this.leaderboards.y = BasicGame.height * .5;
+
 		//this.scale.refresh();
 		/*var newSize = getGameSize();
 		this.game.scale.setupScale(newSize.x,newSize.y);
 		this.game.scale.refresh();
-		var w = this.game.width;
-		var h = this.game.height;
+		var w = BasicGame.width;
+		var h = BasicGame.height;
 		console.log("onGameResized " + w + "x" + h);
 		*/
 
 
-		//this.button_start.x = this.game.width * .5;
-		//this.button_start.y = this.game.height * 0.61;
-        //this.button_hiscores.x = this.game.width - this.button_hiscores.width * .5 - 10;
-        //this.button_hiscores.y = this.game.height - this.button_hiscores.height * .5 - 10;
+		//this.button_start.x = BasicGame.width * .5;
+		//this.button_start.y = BasicGame.height * 0.61;
+        //this.button_hiscores.x = BasicGame.width - this.button_hiscores.width * .5 - 10;
+        //this.button_hiscores.y = BasicGame.height - this.button_hiscores.height * .5 - 10;
         //this.footer.x = w * .5;
         //this.footer.y = h;
 
-        //this.leaderboards.x = this.game.width * .5;
-        //this.leaderboards.y = clamp(this.leaderboards.y, -99999,this.game.height);
-        this.footer.position.set(this.game.width * .5,this.game.height);
+        //this.leaderboards.x = BasicGame.width * .5;
+        //this.leaderboards.y = clamp(this.leaderboards.y, -99999,BasicGame.height);
+        this.footer.position.set(BasicGame.width * .5,BasicGame.height);
+        this.leaderboards.scale.setTo(BasicGame.scaleY,BasicGame.scaleY);
     }
 
 

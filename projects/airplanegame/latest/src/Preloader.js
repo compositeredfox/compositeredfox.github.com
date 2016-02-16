@@ -16,10 +16,10 @@ BasicGame.Preloader.prototype = {
 		//	These are the assets we loaded in Boot.js
 		//	A nice sparkly background and a loading progress bar
 		this.background = this.add.sprite(0, 0, 'preloaderBackground');
-		this.background.width = this.game.width;
-		this.background.height = this.game.height;
+		this.background.width = BasicGame.width;
+		this.background.height = BasicGame.height;
 
-		this.preloadText = new Phaser.Text(this.game, this.game.width * .5 - 100, this.game.height * .5, "Loading...", { font: 55 + "px Helvetica", fill: '#ffffec', 'align': 'left' });
+		this.preloadText = new Phaser.Text(this.game, BasicGame.width * .5 - 100, BasicGame.height * .5, "Loading...", { font: 55 + "px Helvetica", fill: '#ffffec', 'align': 'left' });
 		this.game.add.existing(this.preloadText);
 
 		/*
@@ -133,6 +133,7 @@ BasicGame.Preloader.prototype = {
 		*/
 		//this.update();
 
+
 	},
 
 	create: function () {
@@ -217,7 +218,7 @@ BasicGame.Preloader.prototype = {
 			BasicGame.transition.visible = false;
 
 			if (this.game.device.desktop) {
-				BasicGame.cursor = new Phaser.Image(this.game,this.game.width,this.game.height,'game_finger');
+				BasicGame.cursor = new Phaser.Image(this.game,BasicGame.width,BasicGame.height,'game_finger');
 				BasicGame.cursor.anchor.set(0.13,0.09);
 				this.stage.addChildAt(BasicGame.cursor,this.stage.children.length-1);
 

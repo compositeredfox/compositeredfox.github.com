@@ -14,7 +14,12 @@ BasicGame = {
     openLeaderboards: false,
     seenTutorial: false,
 
-    cheatCodes: true
+    cheatCodes: true,
+
+    scale: 1,
+    scaleY: 1,
+    width:0,
+    height:0
 
 };
 
@@ -29,24 +34,27 @@ BasicGame.Boot.prototype = {
 
         if (this.game.device.desktop)
         {
-            this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-            this.scale.setMinMax(480, 270, 1920, 1080);
+            this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+            //this.scale.setMinMax(480, 270, 1920, 1080);
             this.scale.pageAlignHorizontally = true;
             this.scale.pageAlignVertically = true;
         }
         else
         {
-            this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+            this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
             this.scale.setMinMax(480, 270, 1920, 1080);
             this.scale.pageAlignHorizontally = true;
             this.scale.pageAlignVertically = true;
             this.scale.forceOrientation(true, false);
-            this.scale.setResizeCallback(this.gameResized, this);
+            //this.scale.setResizeCallback(this.gameResized, this);
             this.scale.enterIncorrectOrientation.add(this.enterIncorrectOrientation, this);
             this.scale.leaveIncorrectOrientation.add(this.leaveIncorrectOrientation, this);
         }
 
         //this.game.canvas.style.cursor = 'none';
+
+        this.scale.onSizeChange.add(this.onSizeChanged, this);
+        this.onSizeChanged();
 
     },
 
@@ -64,12 +72,14 @@ BasicGame.Boot.prototype = {
 
     },
 
-    gameResized: function (width, height) {
-
-        //  This could be handy if you need to do any extra processing if the game resizes.
-        //  A resize could happen if for example swapping orientation on a device or resizing the browser window.
-        //  Note that this callback is only really useful if you use a ScaleMode of RESIZE and place it inside your main game state.
-
+    onSizeChanged: function () {
+        console.log('resize game');
+        BasicGame.scale = clamp01(this.game.width / 850);
+        BasicGame.scaleY = clamp01(this.game.height / 730) / BasicGame.scale;
+        BasicGame.width = this.game.width / BasicGame.scale;
+        BasicGame.height = this.game.height / BasicGame.scale;
+        this.world.scale.setTo(BasicGame.scale,BasicGame.scale);
+        
     },
 
     enterIncorrectOrientation: function () {

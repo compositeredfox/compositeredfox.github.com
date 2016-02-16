@@ -73,11 +73,11 @@ body {
 }
 
 .biothumb {
-  width:130px;
-  height:130px;
+  width:110px;
+  height:110px;
   display:inline-block;
   text-align: center;
-  margin-left:15px;
+  margin-left:0px;
 }
 .biotext {
   text-align: left;
@@ -142,4 +142,8 @@ body {
 }
 .fifth {
   width:16%;
+}
+.budgettotal {
+  font-size: 24px; 
+  font-weight: 200;
 }

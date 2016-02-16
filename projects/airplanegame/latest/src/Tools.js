@@ -108,6 +108,7 @@ function TransitionToState(nextState, stage) {
     anim.onComplete.add(function(context, tween){ 
         tween.game.sound.stopAll();
         tween.game.tweens.removeAll();
+        //tween.game.scale.onSizeChange.removeAll();
         tween.game.state.start(nextState);
         tween.game.state.onStateChange.add(TransitionFromState, tween.game.state, 0, tween.game);
     }, this);

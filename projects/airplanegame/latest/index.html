@@ -31,6 +31,7 @@
 	<link rel="apple-touch-icon" sizes="512x512" href="icons/app_icon_512x512.png">
 	<link rel="apple-touch-icon" sizes="1024x1024" href="icons/app_icon_1024x1024.png">
 	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" charset="utf-8" />
+	<script src="js/ios-fullscreen.js"></script>
 	<script src="js/phaser.min.js"></script>
 	<script src="src/Boot.js"></script>
 	<script src="src/Preloader.js"></script>
@@ -40,136 +41,66 @@
 	<script src="src/Tools.js"></script>
 </head>
 <body>
+<div id="brim-mask">
+    Please scroll down to start the game.
+</div>
+<div id="brim-main">
+    <!-- Content displayed to the user when in minimal view.  -->
+    <div id="game">
+    </div>
+</div>
 
-	<div id="game"></div>
-	<div id="orientation"></div>
-	<div id="overlay">
-		<div id="game_mainmenufooter" style="display:none;">
-			<a href="http://www.google.com" target="_blank"><img src="images/mainmenu_footerlogo.png" style="display:inline-block; position: absolute; left:30px; top:22px;" /></a>
-			<div style="position:absolute; right: 30px; bottom: -2px;">See what else you shouldn't do at work: 
-			<a href="http://www.google.com" target="_blank">View our code of conduct 
-			<img src="images/mainmenu_footerlink.png"/></a>
-			</div>
-		</div>
-		
-		<div id="game_footer" style="display:none;">
-			<div style="margin-left:65px; display:inline-block;">See what else you shouldn't do at work</div>
-			<a href="http://www.google.com" target="_blank"><div>View our code of conduct</div></a>
-		</div>
-		
-		<div id="endgame_hiscore" class="game_popup" style="display:none;">
-			<div style="background-image:url('images/game_end_top_hiscore.png'); height:200px; padding:0;">
-				<p style="line-height: 60px; font-size: 60px; color: #990AE3; text-align:left; margin-left:65px; margin-top:50px; position:absolute;">NEW HIGH<br/>SCORE!</p>
-			</div>
-			<div style="padding-top: 40px; padding-left: 40px;">
-				<div class="hiscore_entry"><span class="hiscore_entry_num">06</span><span class="hiscore_entry_name">NAME</span><span class="hiscore_entry_points">5500</span><span class="hiscore_p">p</span></div>
-				<div class="hiscore_separator"></div>
-				<div class="hiscore_entry">
-					<form class="hiscore_form">
-						<span class="hiscore_entry_num">07</span>
-						<input type="text" name="Name" value="YOUR NAME?" maxlength="10" />
-						<span class="hiscore_entry_points">5010</span><span class="hiscore_p">p</span>
-					</form>
-				</div>
-				<div class="hiscore_separator"></div>
-				<div class="hiscore_entry"><span class="hiscore_entry_num">08</span><span class="hiscore_entry_name">NAME</span><span class="hiscore_entry_points">4950</span><span class="hiscore_p">p</span></div>
-				
-				<div style="text-align:center; margin-top:30px;">
-					<a href="dsfdsdfds"><div class="game_popup_button" style="position:absolute; left:60px;">SEE HIGH SCORE BOARD</div></a>
-					<a href="#"><div class="game_popup_button"  style="position:absolute; right:60px;">PLAY AGAIN</div></a>
-				</div>
-			</div>
-		</div>
-		
-		<div id="endgame_gameover" class="game_popup" style="display:none;">
-			<div style="background-image:url('images/game_end_top_gameover.png'); height:200px; padding:0;">
-				<span style="font-size: 60px; color: #990AE3; text-align:left; margin-left:65px; margin-top:45px; position:absolute;">GAME OVER</span>
-				<div style="margin-left: 65px; margin-top: 125px; position:absolute;"><div class="hiscore_entry"><span class="hiscore_entry_name" style="width:620px;">YOUR SCORE</span><span class="hiscore_entry_points">0150</span><span class="hiscore_p">p</span></div></div>
-			</div>
-			<div style="padding-top: 40px; padding-left: 40px;">
-				<div class="hiscore_entry"><span class="hiscore_entry_num">06</span><span class="hiscore_entry_name">NAME</span><span class="hiscore_entry_points">5500</span><span class="hiscore_p">p</span></div>
-				<div class="hiscore_separator"></div>
-				<div class="hiscore_entry"><span class="hiscore_entry_num">07</span><span class="hiscore_entry_name">NAME</span><span class="hiscore_entry_points">5500</span><span class="hiscore_p">p</span></div>
-				<div class="hiscore_separator"></div>
-				<div class="hiscore_entry"><span class="hiscore_entry_num">08</span><span class="hiscore_entry_name">NAME</span><span class="hiscore_entry_points">4950</span><span class="hiscore_p">p</span></div>
-				<!--
-				
-				-->
-				<div style="text-align:center; margin-top:30px;">
-					<a href="#"><div class="game_popup_button" style="position:absolute; left:60px;">SEE HIGH SCORE BOARD</div></a>
-					<a href="#"><div class="game_popup_button"  style="position:absolute; right:60px;">PLAY AGAIN</div></a>
-				</div>
-			</div>
-		</div>
-
-		<div id="leaderboards" class="game_popup" style="display:none;">
-			<div style="background-image:url('images/game_end_top_hiscore.png'); height:200px; padding:0;">
-				<p style="line-height: 60px; font-size: 60px; color: #990AE3; text-align:left; margin-left:60px; margin-top:45px; position:absolute;">HIGH SCORE<br/>BOARD</p>
-			</div>
-			<div style="padding-top: 25px;">
-				<div class="leaderboards_entries_container">
-					<div class="leaderboards_entries_column">
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-					</div>
-					<div class="leaderboards_entries_column">
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-						<div class="leaderboards_entry"><span class="leaderboards_entry_num">06</span><span class="leaderboards_entry_name">NAME</span><span class="leaderboards_entry_points">5500</span><span class="leaderboards_p">p</span></div>
-						<div class="leaderboards_separator"></div>
-					</div>
-				</div>
-				
-				<div style="text-align:center; margin-top:30px;">
-					<a href="#"><div class="game_popup_button" style="position:absolute; left:60px;">QUIT</div></a>
-					<a href="#"><div class="game_popup_button"  style="position:absolute; right:60px;">PLAY AGAIN</div></a>
-				</div>
-			</div>
-		</div>
-
-		<div id="pause_popup" class="game_popup pause_popup" style="display:none;">
-			
-			<p style="font-size: 60px; color: #990AE3; margin-top:125px; line-height: 0;">PAUSED</p>
-
-			<a href="#" id="pause_continue"><div class="game_popup_button pause_button" style="margin-top:25px;">CONTINUE</div></a> 
-			<br/>
-			<a href="#" id="pause_quit"><div class="game_popup_button pause_button" style="margin-top:25px;">QUIT</div></a>
-
-		</div>
-	</div>
-
+<div id="orientation"></div>
+	
 <script type="text/javascript">
 
-(function () {
-	var desiredSize = getGameSize();
-	console.log("starting game " + desiredSize.x + "x" + desiredSize.y);
-	var game = new Phaser.Game(desiredSize.x, desiredSize.y, Phaser.AUTO, 'game');
+function startGame() {
+  var game = window.game = new Phaser.Game('100%','100%', Phaser.AUTO, 'game');
+  game.state.add('Boot', BasicGame.Boot);
+  game.state.add('Preloader', BasicGame.Preloader);
+  game.state.add('MainMenu', BasicGame.MainMenu);
+  game.state.add('Game', BasicGame.Game);
+  game.state.add('Leaderboard', BasicGame.Leaderboard);
+  game.state.start('Boot');
+}
 
-	game.state.add('Boot', BasicGame.Boot);
-	game.state.add('Preloader', BasicGame.Preloader);
-	game.state.add('MainMenu', BasicGame.MainMenu);
-	game.state.add('Game', BasicGame.Game);
-	game.state.add('Leaderboard', BasicGame.Leaderboard);
+function startWithIOSFullscreen(startGame) {
+  var didStartGame;
 
-	//	Now start the Boot state.
-	game.state.start('Boot');
-  window._G = game;
+  if (platform.os.family == 'iOS' && parseInt(platform.os.version, 10) >= 8) {
+    window.addEventListener('DOMContentLoaded', function () {
+        var brim = gajus.Brim({
+          viewport: gajus.Scream({width: {portrait: 320, landscape: 640}})
+        });
 
-})();
+        var onChangeTimeout, viewName;
+        function onChange() {
+          if (!didStartGame && viewName == 'minimal') {
+            didStartGame = true;
+            startGame();
+          }
+        }
+
+        brim.on('viewchange', function (e) {
+          viewName = e.viewName;
+          if (onChangeTimeout) {
+            clearTimeout(onChangeTimeout);
+            onChangeTimeout = null;
+          }
+          onChangeTimeout = setTimeout(onChange, 100);
+        });
+    });
+  } else {
+    didStartGame = true;
+    startGame();
+  }
+	
+}
+
+
+startWithIOSFullscreen(startGame);
+//startGame();
+
 </script>
 
 </body>

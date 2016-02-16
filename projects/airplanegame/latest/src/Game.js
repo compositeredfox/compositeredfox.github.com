@@ -110,10 +110,6 @@ BasicGame.Game.prototype = {
 
         this.resetState();
 
-        var w = this.game.width;
-        var h = this.game.height;
-
-
         this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
         this.gameGroup = this.game.add.group();
@@ -258,7 +254,6 @@ BasicGame.Game.prototype = {
         /// level details
 
         this.levelDetails = this.uiGroup.add(new Phaser.Group(this.game));
-        this.levelDetails.position.set(this.game.width * .5, this.game.height);
 
         var levelDetailsBg = new Phaser.Image(this.game,0,0,'level_detailsbg');
         levelDetailsBg.anchor.set(0.5,1);
@@ -289,8 +284,6 @@ BasicGame.Game.prototype = {
         //this.pauseButton.alpha = 0.8;
         this.pauseButton = this.uiGroup.add(new Phaser.Button(this.game,0,0,'button_pause_group',this.togglePause,this,'button_pause_over','button_pause','button_pause_over','button_pause'));
         this.pauseButton.anchor.set(0.5,0.5);
-        this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
-        this.pauseButton.y = this.pauseButton.height*.5 + 10;
 
         this.levelNumberText = this.uiGroup.add(new Phaser.Group(this.game));
         this.levelNumberText.add(new Phaser.Image(this.game,-234 * .5,-65 * .5,'game_level'));
@@ -304,7 +297,7 @@ BasicGame.Game.prototype = {
 
         this.pauseScreen.blockerGraphic = this.game.add.graphics(0,0, this.pauseScreen);
         this.pauseScreen.blockerGraphic.beginFill("#000000", 0.6);
-        this.pauseScreen.blockerGraphic.drawRect(0,0, this.game.width, this.game.height);
+        this.pauseScreen.blockerGraphic.drawRect(0,0, 1920, 1080);
         this.pauseScreen.blockerGraphic.endFill();
 
         this.pauseScreen.blockerButton = new Phaser.Button(this.game,0,0,'');
@@ -314,8 +307,7 @@ BasicGame.Game.prototype = {
         this.pauseScreen.add(this.pauseScreen.blockerButton);
 
         this.pauseScreen.popup = this.pauseScreen.add(new Phaser.Group(this.game));
-        this.pauseScreen.popup.x = this.game.width * .5;
-        this.pauseScreen.popup.y = this.game.height * .5;
+        
 
         //this.pauseScreen.popup.add(MenuBackground(this.game, 0, 0, 500, 350));
         var pausebg = new Phaser.Image(this.game,0,0,'pause_bg');
@@ -337,7 +329,7 @@ BasicGame.Game.prototype = {
         this.endGameScreen.blocker = this.endGameScreen.add(new Phaser.Group(this.game));
         g = this.game.add.graphics(0,0, this.endGameScreen.blocker);
         g.beginFill("#000000", 0.6);
-        g.drawRect(0,0, this.game.width, this.game.height);
+        g.drawRect(0,0, 1920, 1080);
         g.endFill();
 
         b = new Phaser.Button(this.game,0,0,'');
@@ -418,9 +410,8 @@ BasicGame.Game.prototype = {
         this.endGameScreen.visible = false;
         //this.game.add.existing(this.endGameScreen);
 
-        this.game.world.setBounds(-1920 * 2,-1080,1920*4,1080*2);
-        this.camera.x = 300;
-        this.camera.y = 300 - 55;
+        //this.game.world.setBounds(-1920 * 2,-1080,1920*4,1080*2);
+        this.camera.bounds = null;
 
         UpdateGameCursor(this.game,true);
 
@@ -431,13 +422,17 @@ BasicGame.Game.prototype = {
 
         
         if (BasicGame.cheatCodes == true) {
-            var b = this.uiGroup.add(ButtonWithText(this, 340, 30, "WIN WITH HI SCORE", 'graphic_smallbutton', 18, "#000000", function(){this.score=99999;this.onEndGame(true);}));
+            this.debugButtons = this.uiGroup.add(new Phaser.Group(this.game));
+            var b = this.debugButtons.add(ButtonWithText(this, 0, 0, "WIN WITH HI SCORE", 'graphic_smallbutton', 18, "#000000", function(){this.score=99999;this.onEndGame(true);}));
             b.scale.setTo(0.7,0.7);
-            b = this.uiGroup.add(ButtonWithText(this, 550, 30, "WIN WITHOUT HI SCORE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(true);}));
+            b = this.debugButtons.add(ButtonWithText(this, 210, 0, "WIN WITHOUT HI SCORE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(true);}));
             b.scale.setTo(0.7,0.7);
-            b = this.uiGroup.add(ButtonWithText(this, 760, 30, "LOSE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(false);}));
+            b = this.debugButtons.add(ButtonWithText(this, 420, 0, "LOSE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(false);}));
             b.scale.setTo(0.7,0.7);
         }
+
+        this.scale.onSizeChange.add(this.onGameResized, this);
+        this.onGameResized();
 
 
         if (BasicGame.seenTutorial == true) {
@@ -457,7 +452,7 @@ BasicGame.Game.prototype = {
                 this.tutorialText = new Phaser.Image(this.game,0,0,'game_tutorialtext');
                 this.tutorialText.anchor.set(0.5,0.5);
                 this.uiGroup.add(this.tutorialText);
-                this.tutorialText.position.setTo(this.game.width * .5, this.game.height * .3);
+                this.tutorialText.position.setTo(BasicGame.width * .5, BasicGame.height * .35);
                 this.tutorialText.scale.setTo(0,0);
                 var t = this.game.add.tween(this.tutorialText.scale);
                 t.to( {x:1.25,y:1.25}, 1400, Phaser.Easing.Cubic.Out);
@@ -526,7 +521,13 @@ BasicGame.Game.prototype = {
             this.turbulence = lerp(this.turbulence, (-3 + Math.random() * 6) * levelturbulence + Math.sin(this.game.time.now * 0.005 * levelturbulence) * 5 * levelturbulence, 0.09);
             this.turbulence = clamp(this.turbulence, -4, 15);
             //this.gameGroup.y += this.turbulence;
-            this.camera.y = 300 - 55 + this.turbulence;
+            //this.camera.x = 1920 * .5 - BasicGame.width *.5;
+            //this.camera.y = 1080 * .5 - BasicGame.height * .4 + this.turbulence;
+            //this.camera.x = 1920 * .5 - BasicGame.width *.5;
+            this.gameGroup.x = -1920 * .5 * this.gameGroup.scale.x + BasicGame.width * .5;
+            this.gameGroup.y = -1080 * .5 * this.gameGroup.scale.x + BasicGame.height * .5 - BasicGame.height * .1 + this.turbulence;
+
+
 
             var takingDamage = false;
 
@@ -713,7 +714,7 @@ BasicGame.Game.prototype = {
         var endtext = new Phaser.Image(this.game,0,0,win ? 'game_wintext' : 'game_losetext');
         endtext.anchor.set(0.5,0.5);
         this.uiGroup.add(endtext);
-        endtext.position.setTo(this.game.width * .5, this.game.height * .5);
+        endtext.position.setTo(BasicGame.width * .5, BasicGame.height * .5);
         endtext.scale.setTo(0,0);
         var t = this.game.add.tween(endtext.scale);
         t.to( {x:1.5,y:1.5}, 850, Phaser.Easing.Cubic.Out, true);
@@ -768,12 +769,12 @@ BasicGame.Game.prototype = {
             this.endGameScreen.gameover_hiscore.visible = !hiscore;
             this.endGameScreen.gameover_hiscorep.visible = !hiscore;
 
-            this.endGameScreen.blocker.width = this.game.width;
-            this.endGameScreen.blocker.height = this.game.height;
-            this.endGameScreen.popup.x = this.game.width * .5;
-            this.endGameScreen.popup.y = this.game.height + this.endGameScreen.popup.getBounds().height + 5;
-            this.endGameScreen.footer.x = this.game.width * .5;
-            this.endGameScreen.footer.y = this.game.height + this.endGameScreen.footer.getBounds().height + 5;
+            this.endGameScreen.blocker.width = 1920;
+            this.endGameScreen.blocker.height = 1080;
+            this.endGameScreen.popup.x = 0;
+            this.endGameScreen.popup.y = this.endGameScreen.popup.getBounds().height + 5;
+            this.endGameScreen.footer.x = 0;
+            this.endGameScreen.footer.y = this.endGameScreen.footer.getBounds().height + 5;
 
             this.endGameScreen.gameover_hiscore.visible = !hiscore;
             var t = "";
@@ -813,7 +814,7 @@ BasicGame.Game.prototype = {
 
             this.endGameScreen.visible = true;
 
-            this.game.add.tween(this.endGameScreen.popup.position).to( {y:this.game.height - 158}, 900, Phaser.Easing.Circular.Out, true).onComplete.add(function() {
+            this.game.add.tween(this.endGameScreen.popup.position).to( {y:-this.endGameScreen.footer.getBounds().height}, 900, Phaser.Easing.Circular.Out, true).onComplete.add(function() {
                 if (hiscore) {
                     var self = this;
                     popupTextField.call(this, this.endGameScreen.hiscorelines[yourIndex].name, function(name) {
@@ -824,7 +825,7 @@ BasicGame.Game.prototype = {
                 }
             }, this);
 
-            this.game.add.tween(this.endGameScreen.footer.position).to( {y:this.game.height}, 500, Phaser.Easing.Circular.InOut, true, 900);
+            this.game.add.tween(this.endGameScreen.footer.position).to( {y:0}, 500, Phaser.Easing.Circular.InOut, true, 900);
 
         }, this);
     },
@@ -859,11 +860,13 @@ BasicGame.Game.prototype = {
     restartGame: function(pointer) {
         this.resetState();
         this.game.add.tween(this.music).to({volume:0}, 300).start()
+        this.scale.onSizeChange.remove(this.onGameResized, this);
         TransitionToState('Game', this.stage);
     },
     gotoHiscores: function(pointer) {
         this.resetState();
         this.game.add.tween(this.music).to({volume:0}, 300).start()
+        this.scale.onSizeChange.remove(this.onGameResized, this);
         TransitionToState('MainMenu', this.stage);
         BasicGame.openLeaderboards = true;
     },
@@ -873,6 +876,7 @@ BasicGame.Game.prototype = {
     quitGame: function (pointer) {
         this.resetState();
         this.game.add.tween(this.music).to({volume:0}, 300).start()
+        this.scale.onSizeChange.remove(this.onGameResized, this);
         TransitionToState('MainMenu', this.stage);
 
     },
@@ -1004,7 +1008,7 @@ BasicGame.Game.prototype = {
     tweenLevelText: function(duration, autoStart) {
         if (autoStart == null) autoStart = false;
 
-        this.levelNumberText.position.set(this.game.width * .5, this.game.height * .5);
+        this.levelNumberText.position.set(BasicGame.width * .5, BasicGame.height * .5);
         this.levelNumberText.textSprite.frame = this.currentLevelNumber;
 
         var tweenIn = this.game.add.tween(this.levelNumberText.scale);
@@ -1034,8 +1038,8 @@ BasicGame.Game.prototype = {
         }
         var s = this.uiGroup.add(new Phaser.Image(this.game,0,0,sprite));
         s.anchor.set(0.5,0.5);
-        s.x = this.game.width * .5;
-        s.y = this.game.height * .38;
+        s.x = BasicGame.width * .5;
+        s.y = BasicGame.height * .38;
         s.scale.set(0.6,0.6);
 
         if (duration == null) duration = 1200;
@@ -1082,18 +1086,39 @@ BasicGame.Game.prototype = {
 
     },
 
-    onGameResize: function() {
-        this.levelDetails.position.set(this.game.width * .5, this.game.height);
-        this.endGameScreen.x = this.game.width * .5;
-        this.endGameScreen.y = this.game.height * .5;
-        this.pauseScreen.popup.x = this.game.width * .5;
-        this.pauseScreen.popup.y = this.game.height * .5;
+    onGameResized: function() {
 
-        //this.gameGroup.x = this.game.width * .5 - 1920.0 * 0.5/;
-        //this.gameGroup.y = this.game.height * .5 - 1080.0 * 0.5;
+        var w = BasicGame.width;
+        var h = BasicGame.height;
 
-        this.pauseButton.x = this.game.width - this.pauseButton.width*.5 - 10;
+        var gs = lerp(0.4,1,BasicGame.scaleY);
+        this.gameGroup.scale.setTo(gs,gs);
+        this.gameGroup.x = -1920 * .5 * gs + BasicGame.width * .5;
+        this.gameGroup.y = -1080 * .5 * gs + BasicGame.height * .5 - BasicGame.height * .1 + this.turbulence;
+        
+        this.levelDetails.position.set(w * .5, h);
+        //this.endGameScreen.popup.x = w * .5;
+        //this.endGameScreen.popup.y = h * .5;
+        this.pauseScreen.popup.x = w * .5;
+        this.pauseScreen.popup.y = h * .5;
+
+        if (this.debugButtons != null) {
+            this.debugButtons.x = w * .5 - 420 * .5;
+            this.debugButtons.y = 30;
+        }
+
+        //this.gameGroup.x = BasicGame.width * .5 - 1920.0 * 0.5/;
+        //this.gameGroup.y = BasicGame.height * .5 - 1080.0 * 0.5;
+
+        this.pauseButton.x = w - this.pauseButton.width*.5 - 10;
         this.pauseButton.y = this.pauseButton.height*.5 + 10;
+
+        //var s = lerp(0.5,1,BasicGame.scale-);
+        var s = BasicGame.scaleY;
+        this.endGameScreen.scale.setTo(s,s);
+
+        this.endGameScreen.x = w * .5;
+        this.endGameScreen.y = h;
     },
 
     onKeyDown: function(event) {
@@ -1143,8 +1168,9 @@ BasicGame.Game.prototype = {
 
 };
 
-var px = function(n) { return n + "px"; };
+function px(n) { return n + "px"; };
 
+// return the world position of a phaser element
 var worldPos = function(el) {
   parentPos = el.parent ? worldPos(el.parent) : [0, 0];
   return [el.x + parentPos[0], el.y + parentPos[1]];
@@ -1152,6 +1178,7 @@ var worldPos = function(el) {
 
 var floatingInput;
 
+// remove any previous floating input
 function removeFloatingInput() {
   if (floatingInput) {
     floatingInput.parentNode.removeChild(floatingInput);
@@ -1160,6 +1187,7 @@ function removeFloatingInput() {
 }
 
 function popupTextField(el, callback) {
+  // create an input field
   var input = document.createElement("input");
   input.className = "text-overlay";
   input.setAttribute("type", "text");
@@ -1176,6 +1204,17 @@ function popupTextField(el, callback) {
     }
   };
 
+  // the submit callback for when the user hits enter
+  function submit(name) {
+    input.onkeypress = null;
+    window.onresize = oldResize;
+    el.text = name;
+    input.parentNode.removeChild(input);
+    floatingInput = null;
+    callback(name);
+  };
+
+  // reposition it over the right spot on the canvas whenever the window changes size
   var self = this;
   var update = function() {
     var F = window.innerWidth/self.game.width;
@@ -1185,21 +1224,20 @@ function popupTextField(el, callback) {
     input.setAttribute('maxlength', 10);
     el.text = '';
   };
-  setTimeout(update, 100);
+
+  // listen for size changes on the window
+  var UPDATE_DELAY_MS = 50;
+  setTimeout(update, UPDATE_DELAY_MS);
   document.body.appendChild(input);
   var oldResize = window.onresize;
+  var updateTimeout;
   window.onresize = function() {
     if (oldResize) oldResize.apply(this, arguments);
-    setTimeout(update, 100);
-  };
-
-  function submit(name) {
-    input.onkeypress = null;
-    window.onresize = oldResize;
-    el.text = name;
-    input.parentNode.removeChild(input);
-    floatingInput = null;
-    callback(name);
+    if (updateTimeout) {
+      clearTimeout(updateTimeout)
+      updateTimeout = undefined;
+    }
+    updateTimeout = setTimeout(update, UPDATE_DELAY_MS);
   };
 
   floatingInput = input;
