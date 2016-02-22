@@ -249,103 +249,65 @@ function indexOfSorted(array, attr, val) {
 var scoresUrl = "http://telia-ethics.dev.wolffolins.com/scores";
 var authHeader = 'Basic dGVsaWEtZXRoaWNzOjNleGVickVi'; // derived from user/pass
 
-function JSONHttpRequest() {
-	var _xmlHttpRequest = new XMLHttpRequest(),
-	  _responseJSON = null,
-	  _userContentType = false,
-	  _self = this;
-
-	var property = {
-		get: function() {
-			try { _responseJSON = _xmlHttpRequest.responseText ? (!_responseJSON ? JSON.parse(_xmlHttpRequest.responseText) : _responseJSON) : null; }
-			catch (e) { if (_self.strictJSON) throw e; }
-			return _responseJSON;
-		},
-		enumerable: true,
-		configurable: true
-	}
-	
-	_self.strictJSON = true;
-	Object.defineProperty(_self, 'responseJSON', property);
-	
-	_self.sendJSON = function(data) {
-    	try {
-    		data = JSON.stringify(data);
-    		_responseJSON = null;
-    		if (!_userContentType) _xmlHttpRequest.setRequestHeader('Content-Type', 'application/json;charset=encoding');    		
-    		_userContentType = false;
-		}
-		catch (e) {
-			if (_self.strictJSON)
-				throw e;
-		}
-		_xmlHttpRequest.send(data);
+// GET or POST with auth
+function http(opts) {
+  var request = new XMLHttpRequest();
+  request.open(opts.method, opts.url, true);
+  // include auth header
+  request.setRequestHeader('Authorization', authHeader);
+  if (opts.data) {
+    request.setRequestHeader('Content-Type', 'application/json;charset=encoding');
+  }
+  request.onload = function() {
+    if (request.status >= 200 && request.status < 400) {
+      if (opts.success) {
+        // parse received json data
+        var responseData = JSON.parse(request.responseText);
+        opts.success(responseData);
+      }
+    } else {
+      if (opts.error)
+        opts.error(request.responseText);
     }
-	
-	function proxy(name) {
-		try {
-			if ((typeof _xmlHttpRequest[name]) == 'function') {
-				_self[name] = function() {
-					if (name == 'setRequestHeader')
-						_userContentType = arguments[0].toLowerCase() == 'content-type';
-					return _xmlHttpRequest[name].apply(_xmlHttpRequest, Array.prototype.slice.apply(arguments));
-				};
-			}
-			else {
-				property.get = function() { return _xmlHttpRequest[name]; }
-				property.set = function(value) { _xmlHttpRequest[name] = value; }
-				Object.defineProperty(_self, name, property);	
-			}
-		}
-		catch (e) { /* NOTE Swallow any exceptions, which may rise here. */ }
-	}
-	
-	proxy('onreadystatechange');
-	for (n in _xmlHttpRequest)
-		proxy(n);
+  };
+  request.onerror = opts.error;
+
+  // send json encoded data
+  var sendData;
+  if (opts.data) {
+    sendData = JSON.stringify(opts.data);
+  }
+  request.send(sendData);
 }
 
 function getScores(successCallback, errorCallback) {
-  var request = new JSONHttpRequest();
-  request.open("GET", scoresUrl, true);
-  request.setRequestHeader('Authorization', authHeader);
-  request.onreadystatechange = function() {
-    if (request.readyState !== 4)
-      return;
-
-    if (request.status !== 200)  {
-      errorCallback(request.responseText);
-      return;
-    } 
-
-    var serverHighScores = request.responseJSON;
-    var scores = values(serverHighScores);
-
-    for (var i = 0; i < scores.length; ++i)
-      scores[i].points = parseInt(scores[i].points, 10);
-
-    // return scores sorted
-    scores.sort(function(a, b) { return -cmp('points', a, b); });
-
-    successCallback(scores);
-  };
-
-  request.send(null);
+  http({
+    method: "GET",
+    url: scoresUrl,
+    success: function (serverHighScores) {
+      var scores = values(serverHighScores);
+      // make sure "points" is a number
+      for (var i = 0; i < scores.length; ++i)
+        scores[i].points = parseInt(scores[i].points, 10);
+      // return scores sorted
+      scores.sort(function(a, b) { return -cmp('points', a, b); });
+      successCallback(scores);
+    },
+    error: errorCallback
+  });
 }
 
 function setScore(name, points, successCallback, errorCallback) {
-  var request = new JSONHttpRequest();
-  request.open("POST", scoresUrl, true);
-  request.setRequestHeader('Authorization', authHeader);
-  request.onreadystatechange = function() {
-    if (request.readyState !== 4) return;
-    if (request.status !== 200)  {
-      errorCallback(request.responseText);
-    } else { 
-      successCallback(request.responseText);
-    }
-  };
-  request.sendJSON({name: name, points: points});
+  http({
+    method: "POST",
+    url: scoresUrl,
+    data: {
+      name: name,
+      points: points
+    },
+    success: successCallback,
+    error: errorCallback
+  });
 }
 
 function numberStringForIndex(i) { return (i<9?"0":"") + (i+1); }
