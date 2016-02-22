@@ -251,7 +251,11 @@ var authHeader = 'Basic dGVsaWEtZXRoaWNzOjNleGVickVi'; // derived from user/pass
 
 // GET or POST with auth
 function http(opts) {
-  var request = new XMLHttpRequest();
+  var request;
+  if (window.XDomainRequest)
+    request = new window.XDomainRequest();
+  else
+    request = new XMLHttpRequest();
   request.open(opts.method, opts.url, true);
   // include auth header
   request.setRequestHeader('Authorization', authHeader);
