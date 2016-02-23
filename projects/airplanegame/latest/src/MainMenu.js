@@ -96,10 +96,19 @@ BasicGame.MainMenu.prototype = {
             }
           }
         }
-        this.leaderboards.button_hiscore = ButtonWithTextOver(this,-218, 204, "QUIT", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.closeLeaderboards);
+        this.leaderboards.button_hiscore = ButtonWithTextOver(this,-218, 204, "QUIT", 'button_leaderboards', 'button_endgame1', 12, "#990AE3", this.closeLeaderboards);
         this.leaderboards.popup.add(this.leaderboards.button_hiscore);
-        this.leaderboards.button_restart = ButtonWithTextOver(this,218, 204, "PLAY AGAIN", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.startGame);
+        this.leaderboards.button_restart = ButtonWithTextOver(this,218, 204, "PLAY AGAIN", 'button_leaderboards', 'button_endgame1', 12, "#990AE3", this.startGame);
         this.leaderboards.popup.add(this.leaderboards.button_restart);
+
+        this.leaderboards.button_hiscore.button.onInputOver.add(this.onPauseButtonOver, this, 0, this.leaderboards.button_hiscore.text);
+        this.leaderboards.button_hiscore.button.onInputOut.add(this.onPauseButtonOut, this, 0, this.leaderboards.button_hiscore.text);
+        this.leaderboards.button_hiscore.button.onInputUp.add(this.onPauseButtonOut, this, 0, this.leaderboards.button_hiscore.text);
+        this.onPauseButtonOut(this.leaderboards.button_hiscore.text);
+        this.leaderboards.button_restart.button.onInputOver.add(this.onPauseButtonOver, this, 0, this.leaderboards.button_restart.text);
+        this.leaderboards.button_restart.button.onInputOut.add(this.onPauseButtonOut, this, 0, this.leaderboards.button_restart.text);
+        this.leaderboards.button_restart.button.onInputUp.add(this.onPauseButtonOut, this, 0, this.leaderboards.button_restart.text);
+        this.onPauseButtonOut(this.leaderboards.button_restart.text);
 		
         this.leaderboards.loading = this.leaderboards.popup.add(new Phaser.Image(this.game,0,45, 'loading'));
         this.leaderboards.loading.anchor.set(0.5,0.5);
@@ -107,8 +116,14 @@ BasicGame.MainMenu.prototype = {
 
         this.leaderboards.visible = false;
 
+        this.browserbarinfo = this.game.add.existing(Label(this, 0,0, "Scroll down", 14, '#FFFFFF', 'center', 'Helvetica'));
+        this.browserbarinfo.anchor.set(0.5,0);
+        this.browserbarinfo.visible = false;
+
         this.scale.onSizeChange.add(this.onGameResized, this);
         this.onGameResized();
+
+        this.game.onUIMode.add(this.onUIMode, this);
 
         UpdateGameCursor(this.game,-1);
 
@@ -120,6 +135,8 @@ BasicGame.MainMenu.prototype = {
         // fade in with fix for looping on chrome (doesn't work with built in fade in)
         this.music.onDecoded.add(function(sound){ sound.volume = 0; sound.game.add.tween(sound).to({volume:1}, 500).start()});
         //this.music.onLoop.add(this.loopMusic, this);
+
+        
 
 	},
 
@@ -212,7 +229,7 @@ BasicGame.MainMenu.prototype = {
 		this.leaderboards.playButton.getChildAt(1).tint = 0x990AE3;
 	},
 	onGameResized: function () {
-		console.log('resize mainmenu');
+		console.log('resize mainmenu ' + BasicGame.scale);
 
 		this.bg.width = BasicGame.width;
 		this.bg.height = BasicGame.height;
@@ -225,6 +242,17 @@ BasicGame.MainMenu.prototype = {
 
 		this.leaderboards.x = BasicGame.width * .5;
         this.leaderboards.y = BasicGame.height * .5;
+
+        this.browserbarinfo.x = BasicGame.width * .5;
+        this.browserbarinfo.y = 15;
+
+        var s = 1 + 1.3 * (1-BasicGame.scale);
+        this.button_start.scale.setTo(s,s);
+        s = 1 + 0.6 * (1-BasicGame.scale);
+		this.button_start.text.scale.setTo(s,s);
+
+        this.leaderboards.button_hiscore.text.scale.setTo(1 + 1.8 * (1-BasicGame.scale));
+        this.leaderboards.button_restart.text.scale.setTo(1 + 1.8 * (1-BasicGame.scale));
 
 		//this.scale.refresh();
 		/*var newSize = getGameSize();
@@ -247,6 +275,17 @@ BasicGame.MainMenu.prototype = {
         //this.leaderboards.y = clamp(this.leaderboards.y, -99999,BasicGame.height);
         this.footer.position.set(BasicGame.width * .5,BasicGame.height);
         this.leaderboards.scale.setTo(BasicGame.scaleY,BasicGame.scaleY);
+    },
+
+    onPauseButtonOver: function(button) {
+        button.parent.text.addColor("#FFFFFF",0);
+    },
+    onPauseButtonOut: function(button) {
+        button.parent.text.addColor("#990AE3",0);
+    },
+
+    onUIMode: function(mode) {
+    	//this.browserbarinfo.visible = BasicGame.browserbars;
     }
 
 

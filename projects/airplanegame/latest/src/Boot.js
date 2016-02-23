@@ -11,6 +11,8 @@ BasicGame = {
     /* Your game can check BasicGame.orientated in internal loops to know if it should pause or not */
     orientated: false,
 
+    browserbars: false,
+
     openLeaderboards: false,
     seenTutorial: false,
 
@@ -56,6 +58,10 @@ BasicGame.Boot.prototype = {
         this.scale.onSizeChange.add(this.onSizeChanged, this);
         this.onSizeChanged();
 
+        this.game.onUIMode.add(this.onUIMode, this);
+        BasicGame.browserbars = window.uiMode == 'withbars';
+        console.log("browser bars? " + BasicGame.browserbars);
+
     },
 
     preload: function () {
@@ -80,6 +86,14 @@ BasicGame.Boot.prototype = {
         BasicGame.height = this.game.height / BasicGame.scale;
         this.world.scale.setTo(BasicGame.scale,BasicGame.scale);
         
+    },
+
+    onUIMode: function(mode) {
+        //console.log('game.onUIMode ' + mode);
+        if (mode == 'withbars')
+            BasicGame.browserbars = true;
+        if (mode == 'fullscreen')
+            BasicGame.browserbars = false;
     },
 
     enterIncorrectOrientation: function () {

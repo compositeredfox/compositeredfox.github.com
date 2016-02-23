@@ -292,6 +292,18 @@ BasicGame.Game.prototype = {
         this.levelNumberText.scale.set(0,0);
         this.levelNumberText.visible = false;
 
+        if (BasicGame.cheatCodes == true) {
+            /*
+            this.debugButtons = this.uiGroup.add(new Phaser.Group(this.game));
+            var b = this.debugButtons.add(ButtonWithText(this, 0, 0, "WIN WITH HI SCORE", 'graphic_smallbutton', 18, "#000000", function(){this.score=99999;this.onEndGame(true);}));
+            b.scale.setTo(0.7,0.7);
+            b = this.debugButtons.add(ButtonWithText(this, 210, 0, "WIN WITHOUT HI SCORE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(true);}));
+            b.scale.setTo(0.7,0.7);
+            b = this.debugButtons.add(ButtonWithText(this, 420, 0, "LOSE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(false);}));
+            b.scale.setTo(0.7,0.7);
+            */
+        }
+
         // Pause screen
         this.pauseScreen = this.uiGroup.add(new Phaser.Group(this.game));
 
@@ -316,8 +328,16 @@ BasicGame.Game.prototype = {
 
         var l = Label(this,0, - 167, "PAUSED", 100, "#990AE3", 'center');
         this.pauseScreen.popup.add(l);
-        this.pauseScreen.popup.add(ButtonWithTextOver(this,0, 30, "CONTINUE", 'button_endgame1_over', 'button_endgame1', 12, "#990AE3", this.togglePause));
-        this.pauseScreen.popup.add(ButtonWithTextOver(this,0, 100, "QUIT", 'button_endgame1_over', 'button_endgame1', 12, "#990AE3", this.quitGame));
+        this.pauseScreen.continueButton = this.pauseScreen.popup.add(ButtonWithTextOver(this,0, 30, "CONTINUE", 'button_endgame1_over', 'button_endgame1', 12, "#FFFFFF", this.togglePause));
+        this.pauseScreen.quitButton = this.pauseScreen.popup.add(ButtonWithTextOver(this,0, 100, "QUIT", 'button_endgame1_over', 'button_endgame1', 12, "#FFFFFF", this.quitGame));
+        this.pauseScreen.continueButton.button.onInputOver.add(this.onPauseButtonOver, this, 0, this.pauseScreen.continueButton.text);
+        this.pauseScreen.continueButton.button.onInputOut.add(this.onPauseButtonOut, this, 0, this.pauseScreen.continueButton.text);
+        this.pauseScreen.continueButton.button.onInputUp.add(this.onPauseButtonOut, this, 0, this.pauseScreen.continueButton.text);
+        this.onPauseButtonOut(this.pauseScreen.continueButton.text);
+        this.pauseScreen.quitButton.button.onInputOver.add(this.onPauseButtonOver, this, 0, this.pauseScreen.quitButton.text);
+        this.pauseScreen.quitButton.button.onInputOut.add(this.onPauseButtonOut, this, 0, this.pauseScreen.quitButton.text);
+        this.pauseScreen.quitButton.button.onInputUp.add(this.onPauseButtonOut, this, 0, this.pauseScreen.quitButton.text);
+        this.onPauseButtonOut(this.pauseScreen.quitButton.text);
 
         this.pauseScreen.visible = false;
 
@@ -391,10 +411,19 @@ BasicGame.Game.prototype = {
             this.endGameScreen.hiscoretable.add(this.endGameScreen.hiscorelines[i].p);
 
         };
-        this.endGameScreen.button_hiscore = ButtonWithTextOver(this,-230, -66, "SEE HIGH SCORE BOARD", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.gotoHiscores);
+        this.endGameScreen.button_hiscore = ButtonWithTextOver(this,-230, -66, "SEE HIGH SCORE BOARD", 'button_leaderboards', 'button_endgame1', 12, "#990AE3", this.gotoHiscores);
         this.endGameScreen.popup.add(this.endGameScreen.button_hiscore);
-        this.endGameScreen.button_restart = ButtonWithTextOver(this,230, -66, "PLAY AGAIN", 'button_endgame1', 'button_endgame1_over', 12, "#990AE3", this.restartGame);
+        this.endGameScreen.button_restart = ButtonWithTextOver(this,230, -66, "PLAY AGAIN", 'button_leaderboards', 'button_endgame1', 12, "#990AE3", this.restartGame);
         this.endGameScreen.popup.add(this.endGameScreen.button_restart);
+
+        this.endGameScreen.button_hiscore.button.onInputOver.add(this.onPauseButtonOver, this, 0, this.endGameScreen.button_hiscore.text);
+        this.endGameScreen.button_hiscore.button.onInputOut.add(this.onPauseButtonOut, this, 0, this.endGameScreen.button_hiscore.text);
+        this.endGameScreen.button_hiscore.button.onInputUp.add(this.onPauseButtonOut, this, 0, this.endGameScreen.button_hiscore.text);
+        this.onPauseButtonOut(this.endGameScreen.button_hiscore.text);
+        this.endGameScreen.button_restart.button.onInputOver.add(this.onPauseButtonOver, this, 0, this.endGameScreen.button_restart.text);
+        this.endGameScreen.button_restart.button.onInputOut.add(this.onPauseButtonOut, this, 0, this.endGameScreen.button_restart.text);
+        this.endGameScreen.button_restart.button.onInputUp.add(this.onPauseButtonOut, this, 0, this.endGameScreen.button_restart.text);
+        this.onPauseButtonOut(this.endGameScreen.button_restart.text);
 
         this.endGameScreen.loading = this.endGameScreen.popup.add(new Phaser.Image(this.game,0,-210, 'loading'));
         this.endGameScreen.loading.anchor.set(0.5,0.5);
@@ -420,16 +449,6 @@ BasicGame.Game.prototype = {
         //document.getElementById("pause_continue").onclick = this.togglePause;
         //document.getElementById("pause_quit").onclick = this.quitGame;
 
-        
-        if (BasicGame.cheatCodes == true) {
-            this.debugButtons = this.uiGroup.add(new Phaser.Group(this.game));
-            var b = this.debugButtons.add(ButtonWithText(this, 0, 0, "WIN WITH HI SCORE", 'graphic_smallbutton', 18, "#000000", function(){this.score=99999;this.onEndGame(true);}));
-            b.scale.setTo(0.7,0.7);
-            b = this.debugButtons.add(ButtonWithText(this, 210, 0, "WIN WITHOUT HI SCORE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(true);}));
-            b.scale.setTo(0.7,0.7);
-            b = this.debugButtons.add(ButtonWithText(this, 420, 0, "LOSE", 'graphic_smallbutton', 18, '#000000', function(){this.score=100;this.onEndGame(false);}));
-            b.scale.setTo(0.7,0.7);
-        }
 
         this.scale.onSizeChange.add(this.onGameResized, this);
         this.onGameResized();
@@ -847,11 +866,15 @@ BasicGame.Game.prototype = {
     togglePause: function(pointer) {
         if (this.showingTutorial == true) return;
 
+        this.onPauseButtonOut(this.pauseScreen.continueButton.text);
+        this.onPauseButtonOut(this.pauseScreen.quitButton.text);
+
+
         this.pauseScreen.visible = !this.pauseScreen.visible;
         if (this.pauseScreen.visible) {
             this.pauseScreen.popup.scale.set(0.1,0.1);
             var tween1 = this.game.add.tween(this.pauseScreen.popup.scale);
-            tween1.to( {x:1,y:1}, 600, Phaser.Easing.Elastic.Out);
+            tween1.to( {x:BasicGame.scaleY,y:BasicGame.scaleY}, 600, Phaser.Easing.Elastic.Out);
             tween1.start();
 //            tween.onStart.add(function(context,tween){context.})
         }
@@ -1101,10 +1124,20 @@ BasicGame.Game.prototype = {
         //this.endGameScreen.popup.y = h * .5;
         this.pauseScreen.popup.x = w * .5;
         this.pauseScreen.popup.y = h * .5;
+        this.pauseScreen.popup.scale.setTo(BasicGame.scaleY, BasicGame.scaleY);
+
+        var buttonscale = 1 + 1.7 * (1-BasicGame.scale);
+        this.pauseScreen.continueButton.text.scale.setTo(buttonscale,buttonscale);
+        this.pauseScreen.quitButton.text.scale.setTo(buttonscale,buttonscale);
+        buttonscale = 1 + 1.2 * (1-BasicGame.scale);
+        this.endGameScreen.button_hiscore.text.scale.setTo(buttonscale, buttonscale);
+        this.endGameScreen.button_restart.text.scale.setTo(buttonscale, buttonscale);
+
+        this.endGameScreen.footer.button.text.scale.setTo(1 + 0.7 * (1-BasicGame.scale));
 
         if (this.debugButtons != null) {
             this.debugButtons.x = w * .5 - 420 * .5;
-            this.debugButtons.y = 30;
+            this.debugButtons.y = h - 100;
         }
 
         //this.gameGroup.x = BasicGame.width * .5 - 1920.0 * 0.5/;
@@ -1164,6 +1197,12 @@ BasicGame.Game.prototype = {
                 }
             }
         }
+    },
+    onPauseButtonOver: function(button) {
+        button.parent.text.addColor("#FFFFFF",0);
+    },
+    onPauseButtonOut: function(button) {
+        button.parent.text.addColor("#990AE3",0);
     }
 
 };
@@ -1186,7 +1225,20 @@ function removeFloatingInput() {
   }
 }
 
+var isMobile = window.orientation !== undefined;
+
 function popupTextField(el, callback) {
+  if (false && isMobile) {
+     var name = prompt("Please enter your name:");
+     if (name) {
+       el.text = name;
+       setTimeout(function() {
+         callback(name);
+       }, 2000);
+       return;
+     }
+  }
+
   // create an input field
   var input = document.createElement("input");
   input.className = "text-overlay";

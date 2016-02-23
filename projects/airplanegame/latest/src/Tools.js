@@ -37,6 +37,8 @@ function ButtonWithText(context, x, y, text, graphic, fontSize, fontColor, onHit
         b.width = t.width + 10;
         b.height = t.height + 10;
     }
+    group.text = t;
+    group.button = b;
     group.add(t);
     return group;
 }
@@ -49,6 +51,8 @@ function ButtonWithTextOver(context, x, y, text, outFrame, overFrame, fontSize, 
     group.add(b);
     var t = new Phaser.Text(context.game, 0, 3, text, { font: fontSize + "px Helvetica", fill: fontColor, align: "center" }); 
     t.anchor.set(0.5,0.5);
+    group.text = t;
+    group.button = b;
     group.add(t);
     return group;
 }
@@ -249,44 +253,13 @@ function indexOfSorted(array, attr, val) {
 var scoresUrl = "http://telia-ethics.dev.wolffolins.com/scores";
 var authHeader = 'Basic dGVsaWEtZXRoaWNzOjNleGVickVi'; // derived from user/pass
 
-// GET or POST with auth
-function http(opts) {
-  var request;
-  if (window.XDomainRequest)
-    request = new window.XDomainRequest();
-  else
-    request = new XMLHttpRequest();
-  request.open(opts.method, opts.url, true);
-  // include auth header
-  request.setRequestHeader('Authorization', authHeader);
-  if (opts.data) {
-    request.setRequestHeader('Content-Type', 'application/json;charset=encoding');
-  }
-  request.onload = function() {
-    if (request.status >= 200 && request.status < 400) {
-      if (opts.success) {
-        // parse received json data
-        var responseData = JSON.parse(request.responseText);
-        opts.success(responseData);
-      }
-    } else {
-      if (opts.error)
-        opts.error(request.responseText);
-    }
-  };
-  request.onerror = opts.error;
-
-  // send json encoded data
-  var sendData;
-  if (opts.data) {
-    sendData = JSON.stringify(opts.data);
-  }
-  request.send(sendData);
+function addAuth(xhr) {
+  xhr.setRequestHeader('Authorization', authHeader);
 }
 
 function getScores(successCallback, errorCallback) {
-  http({
-    method: "GET",
+  $.ajax({
+    type: "GET",
     url: scoresUrl,
     success: function (serverHighScores) {
       var scores = values(serverHighScores);
@@ -297,20 +270,24 @@ function getScores(successCallback, errorCallback) {
       scores.sort(function(a, b) { return -cmp('points', a, b); });
       successCallback(scores);
     },
-    error: errorCallback
+    error: errorCallback,
+    beforeSend: addAuth
   });
 }
 
 function setScore(name, points, successCallback, errorCallback) {
-  http({
-    method: "POST",
+  $.ajax({
+    type: "POST",
     url: scoresUrl,
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
     data: {
       name: name,
       points: points
     },
     success: successCallback,
-    error: errorCallback
+    error: errorCallback,
+    beforeSend: addAuth
   });
 }
 

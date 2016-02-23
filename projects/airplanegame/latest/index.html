@@ -31,6 +31,7 @@
 	<link rel="apple-touch-icon" sizes="512x512" href="icons/app_icon_512x512.png">
 	<link rel="apple-touch-icon" sizes="1024x1024" href="icons/app_icon_1024x1024.png">
 	<link rel="stylesheet" href="css/stylesheet.css" type="text/css" charset="utf-8" />
+  <script src="src/jquery-1.12.0.min.js"></script>
 	<script src="js/ios-fullscreen.js"></script>
 	<script src="js/phaser.min.js"></script>
 	<script src="src/Boot.js"></script>
@@ -41,31 +42,57 @@
 	<script src="src/Tools.js"></script>
 </head>
 <body>
+
+
 <div id="brim-mask">
-    Please scroll down to start the game.
 </div>
 <div id="brim-main">
-    <!-- Content displayed to the user when in minimal view.  -->
-    <div id="game">
-    </div>
+  <div id="game"></div>
 </div>
 
 <div id="orientation"></div>
-	
 <script type="text/javascript">
+var game;
+var uiMode;
 
 function startGame() {
-  var game = window.game = new Phaser.Game('100%','100%', Phaser.AUTO, 'game');
+  game = window.game = new Phaser.Game('100%','100%', Phaser.AUTO, 'game');
   game.state.add('Boot', BasicGame.Boot);
   game.state.add('Preloader', BasicGame.Preloader);
   game.state.add('MainMenu', BasicGame.MainMenu);
   game.state.add('Game', BasicGame.Game);
   game.state.add('Leaderboard', BasicGame.Leaderboard);
   game.state.start('Boot');
+
+  game.onUIMode = new Phaser.Signal();
+  game.onUIMode.dispatch(uiMode);
 }
+
+function setUIMode(mode) {
+  uiMode = mode;
+  if (game != undefined && game.onUIMode != undefined) game.onUIMode.dispatch(mode);
+}
+
+var gameDiv = document.getElementById("game");
+
+var domContentLoaded = false;
+var loaded = false;
 
 function startWithIOSFullscreen(startGame) {
   var didStartGame;
+  function maybeStartGame() {
+    if (domContentLoaded && loaded) {
+      if (!didStartGame) {
+        didStartGame = true;
+        startGame();
+      }
+    }
+  }
+
+  window.addEventListener('load', function() {
+    loaded = true;
+    maybeStartGame();
+  });
 
   if (platform.os.family == 'iOS' && parseInt(platform.os.version, 10) >= 8) {
     window.addEventListener('DOMContentLoaded', function () {
@@ -75,10 +102,13 @@ function startWithIOSFullscreen(startGame) {
 
         var onChangeTimeout, viewName;
         function onChange() {
-          if (!didStartGame && viewName == 'minimal') {
-            didStartGame = true;
-            startGame();
-          }
+          if (viewName == 'full')
+            setUIMode('withbars');
+          else if (viewName == 'minimal')
+            setUIMode('fullscreen');
+
+          domContentLoaded = true;
+          maybeStartGame();
         }
 
         brim.on('viewchange', function (e) {
@@ -91,8 +121,10 @@ function startWithIOSFullscreen(startGame) {
         });
     });
   } else {
-    didStartGame = true;
-    startGame();
+    window.addEventListener('DOMContentLoaded', function() {
+      domContentLoaded = true;
+      maybeStartGame();
+    });
   }
 	
 }
