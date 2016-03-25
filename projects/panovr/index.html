@@ -15,7 +15,9 @@
 
   <!-- FONT
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">-->
+  <script src="https://use.typekit.net/act1ult.js"></script>
+  <script>try{Typekit.load({ async: true });}catch(e){}</script>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -44,49 +46,11 @@
   </div>
 
   <div class="section">
-      <div class="container u-max-full-width" style="text-align:left; font-size:18px;">
+      <div class="container u-max-full-width" style="text-align:left;">
 
         <!--<iframe id="ytplayer" class="u-max-full-width" style="height:31em; border-radius: 5px;" width="100%" height="100%" src="https://www.youtube.com/embed/ym5ybqkCVX8?enablejsapi=1" frameborder="0" allowfullscreen></iframe>-->
-        <div id="player" class="u-max-full-width" style="width:100%; height:30.45em; border-radius: 10px; background-color: transparent;"></div>
-        <script>
-          // 2. This code loads the IFrame Player API code asynchronously.
-          var tag = document.createElement('script');
-
-          tag.src = "https://www.youtube.com/iframe_api";
-          var firstScriptTag = document.getElementsByTagName('script')[0];
-          firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-          // 3. This function creates an <iframe> (and YouTube player)
-          //    after the API code downloads.
-          var player;
-          function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-              width: '100%',
-              height: '100%',
-              videoId: 'iUWQ9qJDQUU',
-              events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-              }
-            });
-          }
-
-          // 4. The API will call this function when the video player is ready.
-          function onPlayerReady(event) {
-            //
-            player.height = player.width * (1280/720);
-          }
-
-          // 5. The API calls this function when the player's state changes.
-          //    The function indicates that when playing a video (state=1),
-          //    the player should play for six seconds and then stop.
-          function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING) {
-              event.target.setPlaybackQuality('hd720');
-            }
-          }
-        </script>
-
+        <div id="player_pano" class="u-max-full-width" style="width:100%; height:30.45em; border-radius: 10px; background-color: transparent;"></div>
+        
         <p style="margin-top:60px;"></p>
         <p>PANORAMICAL is an immersive interactive experience about exploring “musical landscapes”. Players shape the abstract worlds’ visuals and sounds.</p>
         
@@ -176,7 +140,7 @@
       <div class="section">
         <div class="container u-max-full-width" style="text-align:left;">
           <div class="row" style="text-align: center;">
-            <p style="font-size: 16px; font-style:italic; margin-top: 30px; margin-bottom: 50px;">Turn peaceful mountains into thumping valleys into jazz solo forests into ominous caves,<br/> turn day into night, turn oceans into deserts into atmosphere and the soundscape transforms with you.</p>
+            <p style="font-size: 18px; font-style:italic; margin-top: 30px; margin-bottom: 50px;">Turn peaceful mountains into thumping valleys into jazz solo forests into ominous caves,<br/> turn day into night, turn oceans into deserts into atmosphere and the soundscape transforms with you.</p>
           </div>
           <div class="row">
             <div class="thumbnail"><a href="images/panoramical3.jpg" data-lity><img class="u-max-full-width" src="images/panoramical3_t.jpg"></a></div>
@@ -195,7 +159,7 @@
 
           <p style="text-align:center; font-size: 22px; font-weight: 200; margin-top: 50px;">showcased in museums and festivals around the world</p>
           
-          <div class="accolades" style="margin-top:30px;">
+          <div class="accolades" style="margin-top:30px; width:80%; margin-left: 10%;">
             <div class="row">
               <div class="three columns accolade-item"><span class="accolade-title">SF MoMA</span><br><span class="accolade-subtitle">San Francisco</span></div>
               <div class="three columns accolade-item"><span class="accolade-title">XOXO</span><br><span class="accolade-subtitle">Portland</span></div>
@@ -257,9 +221,18 @@
 
           <p><strong>Because of its achievements at allowing presence, immersion and freedom of movement we believe the HTC Vive is the ideal HMD for a VR version of PANORAMICAL.</strong></p>
 
-          <p>The result will be a short interactive experience where you manipulate the sights and sounds of all fifteen environments in the original PANORAMICAL plus extra content created from the grounds up for the Vive.</p>
+          <p>The result will be an immersive interactive experience where you manipulate the sights and sounds of several musical environments created from the ground up for VR, with controls designed for the Vive.</p>
 
-          <div  style="font-size:18px; font-weight: normal;">
+          <p>See the results so far in our current prototype, where the player controls the scene by moving floating orbs around 3D space:</p>
+          
+
+          <div id="player_vr" class="u-max-full-width" style="width:100%; height:30.45em; border-radius: 10px; background-color: transparent;"></div>
+
+
+          <p style="text-align: center; margin-top:30px; margin-bottom: 30px;"><a class="button button-primary" href="https://dl.dropboxusercontent.com/u/64314/Games/panoramical/vr/PANORAMICAL_VR_2016-03-25.zip" target="_blank" style="font-size:20px; font-weight: 400; padding: 30px; line-height: 5px;">Download Prototype</a></p>
+          
+
+          <div  style="font-size:18px; ">
             <div class="row">
               <div class="two columns" style="text-align: center; vertical-align: middle;">
                 <div style="height:15px;"></div><span style="font-size:60px; font-family: 'Arial'; line-height: 30px;"> &#9786;</span>
@@ -284,17 +257,18 @@
                 <div style="height:4px;"></div><img src="images/symbol_couch.png" height="25" style="display:inline-block;"> <img src="images/symbol_standing.png" height="43" style="display:inline-block;">
               </div>
               <div class="ten columns">
-                <p><i>PANORAMICAL VR</i> will come to life as a <strong>standing experience</strong> with full use of room-scale VR while remaining accesible and enjoyable while <strong>seated</strong>.</p>
+                <p><i>PANORAMICAL VR</i> will come to life as a <strong>room-scale experience</strong> with full use of the Vive's capabilities while remaining accesible and enjoyable while <strong>seated</strong>.</p>
               </div>
             </div>
           </div>
           
           <br />
 
-          <p>We will prototype different methods of exploring and manipulating the scenes to find playful interactions only possible with the HTC Vive:</p>
+          <p>We will prototype different methods of exploring and manipulating the scenes to find playful interactions that work best with the HTC Vive:</p>
 
         <div class="row">
-        <div class="featureblock four columns ">
+        <!--
+          <div class="featureblock four columns ">
             <div class="featureblock_featureimg" style="background-image:url('images/features_controls.jpg');">
               <p class="featureblock_mockuptext">(Mockup)</p>
             </div>
@@ -304,6 +278,7 @@
               Manipulate a virtual interface using natural gestures with fine control over the game’s visuals and sounds.  
             </div>
           </div>
+          -->
           <div class="featureblock four columns ">
             <div class="featureblock_featureimg" style="background-image:url('images/features_orbs.jpg');"><p class="featureblock_mockuptext">(Mockup)</p></div>
               
@@ -318,21 +293,12 @@
           <div class="four columns featureblock">
             <div class="featureblock_featureimg" style="background-image:url('images/komorebi.gif');"></div>
             <div class="featureblock_text">
-              <h2>CONTROL WITH YOUR LOOK</h2>
+              <h2>HEAD CONTROLLER</h2>
               Where you look changes what you see: explore a scene using your head's orientation as a controller.
             </div>
           </div>
-          
-        </div>
-        <div class="row">
-        <div class="four columns featureblock">
-            <div class="featureblock_featureimg" style="background-image:url('images/features_mini.jpg');"><p class="featureblock_mockuptext">(Mockup)</p></div>
-            <div class="featureblock_text">
-              <h2>MINIATURE WORLD</h2>
-              Scale the world around you into a miniature in the center of the playspace and walk around it to observe from above.
-            </div>
-          </div>
-           <div class="four columns featureblock">
+
+          <div class="four columns featureblock">
             <div class="featureblock_featureimg" style="background-image:url('images/features_shape.png');"><p class="featureblock_mockuptext">(Mockup)</p></div>
             <div class="featureblock_text">
               <h2>DRAWING SHAPES</h2>
@@ -340,9 +306,20 @@
             </div>
           </div>
           
+        </div>
+        <div class="row">
+          <div class="four columns featureblock" style="margin-left: 16%;">
+            <div class="featureblock_featureimg" style="background-image:url('images/features_mini.jpg');"><p class="featureblock_mockuptext">(Mockup)</p></div>
+            <div class="featureblock_text">
+              <h2>MINIATURE WORLD</h2>
+              Scale the world around you into a miniature in the center of the playspace and walk around it to observe from above.
+            </div>
+          </div>
+           
+          
           
           <div class="four columns featureblock">
-          <div class="featureblock_featureimg" style="background-image:url('images/features_sound.png');"></div>
+            <div class="featureblock_featureimg" style="background-image:url('images/features_sound.png');"></div>
             <div class="featureblock_text">
               <h2>3D SOUNDSCAPES</h2>
               PANORAMICAL’s sounds are as important as its sights, so we’ll rework the sound design for each scene to make it work at its best in a 3D environment, placing the player inside the world.
@@ -350,11 +327,39 @@
           </div>
           
         </div>
-        
+        <!--
+        <div class="row">
+          <div class="four columns featureblock" style="margin-left: 16.5%">
+            <div class="featureblock_featureimg" style="background-image:url('images/features_shape.png');"><p class="featureblock_mockuptext">(Mockup)</p></div>
+            <div class="featureblock_text">
+              <h2>CONTENT SHARING</h2>
+              Share a beautiful space you've found or be transported to another player's. <br />Record your input and create a performance for others to see.
+            </div>
+          </div>
+           
+          <div class="four columns featureblock">
+            <div class="featureblock_featureimg" style="background-image:url('images/features_artist.jpg');"></div>
+            <div class="featureblock_text">
+              <h2>PREMIER CONTENT</h2>
+              PANORAMICAL VR will include a guest scene created by an outside artist, just for the Vive version. <br/>A special world featuring their own style.
+            </div>
+          </div>
+        </div>
+        -->
 
         <p style="margin-top: 50px;">Since we would take content from the original game, producing PANORAMICAL VR would let us heavily focus on making a great interface for the Vive.</p>
 
-        <p style="margin-top: 50px;">PANORAMICAL in VR is something we really want to explore. Because it's so unique—relaxing, introspective, playful, performative—we think players around the world would see it as essential to their new growing VR game library, and we're looking forward to working with HTC to make this a reality.</p>
+        <p style="margin-top: 50px;">Once complete, there's plenty of space down the road for PANORAMICAL VR to become a showpiece for non-gaming VR:</p>
+        <ul style="margin-top:0; font-size: 18px; margin-left:30px;">
+          <li>Implementing <strong>user content sharing</strong> capabilities to engage players to share their discoveries: Take snapshots and post them on social media, record a performance for other players to see</li>
+          <li>Arranging for <strong>demo installations</strong> at galleries and venues that have featured the original PANORAMICAL, like the EMP Museum in Seattle and the Game Science Center in Berlin, and present VR to broader audiences like creators, art consumers and the general public, <strong>showing how the Vive can be used in non-gaming contexts</strong></li>
+          <li><strong>Collaborating with artists</strong> to create premium content: new worlds rendered in each creator's style</li>
+        </ul>
+         
+        <!--
+        <p style="margin-top: 50px;">Once complete, we can arrange for demo installations at galleries and venues that have featured the original PANORAMICAL, like the EMP Museum in Seattle and the Game Science Center in Berlin, and present VR to broader audiences like creators, art consumers and the general public. It would be a great showcase piece for how the Vive can be used in non-gaming contexts.</p>
+        -->
+        <p style="margin-top: 50px;">PANORAMICAL in VR is something we really want to explore. Because it's so unique—relaxing, introspective, playful, performative—we think players around the world would see it as essential to their new growing VR game library, and we're looking forward to working with you to make this a reality.</p>
 
         <!--
         <br />
@@ -495,6 +500,56 @@
         -->
       </div>
   </div>
+
+  <script>
+      // 2. This code loads the IFrame Player API code asynchronously.
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      // 3. This function creates an <iframe> (and YouTube player)
+      //    after the API code downloads.
+      var player_vr;
+      var player_pano;
+      function onYouTubeIframeAPIReady() {
+        player_pano = new YT.Player('player_pano', {
+          width: '100%',
+          height: '100%',
+          videoId: 'iUWQ9qJDQUU',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+        player_vr = new YT.Player('player_vr', {
+          width: '100%',
+          height: '100%',
+          videoId: 'waPn8ON5oMo',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+      }
+
+      // 4. The API will call this function when the video player is ready.
+      function onPlayerReady(event) {
+        //
+        player_pano.height = player_pano.width * (1280/720);
+        player_vr.height = player_vr.width * (1280/720);
+      }
+
+      // 5. The API calls this function when the player's state changes.
+      //    The function indicates that when playing a video (state=1),
+      //    the player should play for six seconds and then stop.
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PLAYING) {
+          event.target.setPlaybackQuality('hd720');
+        }
+      }
+    </script>
 
 <!-- End Document
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->

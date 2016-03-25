@@ -1,6 +1,9 @@
 
 body {
   background-color: #f8f7ef;
+  font-family: "museo-sans", 'Helvetica', sans-serif;
+  font-size: 18px;  
+  font-weight: 300;
 }
 body a{
   color: #288ebd;
